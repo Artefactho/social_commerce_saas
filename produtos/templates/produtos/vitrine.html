@@ -1,249 +1,186 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ loja.nome }} | Vitrine{% endblock %}
 
 {% block extrastyle %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Importando o Tailwind via CDN para a vitrine isolada -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          heading: ['Plus Jakarta Sans', 'sans-serif'],
+        },
+        colors: {
+          background: "hsl(0 0% 98%)",
+          foreground: "hsl(220 20% 10%)",
+          primary: {
+            DEFAULT: "hsl(220 90% 56%)",
+            hover: "hsl(220 90% 48%)",
+            foreground: "hsl(0 0% 100%)",
+          },
+          card: "hsl(0 0% 100%)",
+          surface: "hsl(0 0% 100%)",
+          border: "hsl(220 13% 91%)",
+          text: {
+            primary: "hsl(220 20% 10%)",
+            secondary: "hsl(220 10% 46%)"
+          }
+        },
+        borderRadius: {
+          card: '16px',
+          button: '12px'
+        }
+      }
+    }
+  }
+</script>
 <style>
-    /* --- 4. SPACING & NIVEIS (RESPIIRO VISUAL) --- */
-    .animate-fade-in { display: flex; flex-direction: column; gap: 32px; padding-bottom: 60px; }
-
-    /* --- 1. HERO (CONTRASTE E GLASS EFFECT) --- */
-    .hero-box { 
-        margin: 0 16px; 
-        position: relative; 
-        aspect-ratio: 16/9; 
-        border-radius: var(--radius-card-lg); 
-        overflow: hidden; 
-        box-shadow: var(--shadow-lg); 
-    }
-    .hero-img { width: 100%; height: 100%; object-fit: cover; }
-    .hero-overlay { 
-        position: absolute; 
-        inset: 0; 
-        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 100%); 
-    }
-    .hero-content { 
-        position: absolute; 
-        bottom: 20px; left: 20px; right: 20px; 
-        padding: 20px; 
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: var(--radius-card);
-        color: white; 
-        display: flex; flex-direction: column; gap: 4px;
-    }
-
-    /* --- 2. HIGHLIGHTS (USO ESTRATÉGICO DE COR) --- */
-    .highlight-container { display: flex; gap: 16px; overflow-x: auto; padding: 0 20px 4px; scroll-behavior: smooth; }
-    .highlight-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; width: 72px; }
-    
-    .highlight-circle { 
-        width: 66px; height: 66px; border-radius: 50%; 
-        border: 2.5px solid hsl(var(--primary)); /* Sempre na cor do tema */
-        padding: 3px; background: hsl(var(--surface)); 
-        transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex; align-items: center; justify-content: center;
-    }
-    /* Ativo: escala e sombra */
-    .highlight-item.active .highlight-circle { 
-        transform: scale(1.08);
-        box-shadow: 0 0 0 3px hsla(var(--primary), 0.2);
-    }
-    /* Placeholder de ícone */
-    .highlight-placeholder {
-        width: 100%; height: 100%; border-radius: 50%;
-        background: hsla(var(--primary), 0.08);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 22px; color: hsl(var(--primary));
-    }
-    .highlight-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-    .highlight-label { font-size: 11px; font-weight: 600; color: hsl(var(--text-secondary)); text-align: center; }
-
-    /* --- 2. CATEGORY CHIPS (MAIS EVIDENTE NO ATIVO) --- */
-    .chips-container { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px; }
-    .chip-item { 
-        flex: 0 0 auto; 
-        background: hsl(var(--secondary)); 
-        color: hsl(var(--text-secondary)); 
-        padding: 10px 22px; 
-        border-radius: var(--radius-button); 
-        font-size: 14px; font-weight: 600; 
-        text-decoration: none; transition: all 0.2s; 
-    }
-    .chip-item.active { 
-        background: hsl(var(--primary)); 
-        color: hsl(var(--primary-foreground)); 
-        box-shadow: 0 4px 12px hsla(var(--primary), 0.3);
-        transform: scale(1.05);
-    }
-
-    /* --- 3. PRODUCT CARDS (HIERARQUIA E CONVERSÃO) --- */
-    .p-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 16px; }
-    .p-card { 
-        background: hsl(var(--surface)); 
-        border-radius: var(--radius-card); 
-        border: 1px solid hsl(var(--border)); 
-        box-shadow: var(--shadow-sm); 
-        display: flex; flex-direction: column; 
-        overflow: hidden; transition: all 0.3s; 
-    }
-    .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-    
-    .p-img-wrapper { aspect-ratio: 1/1; position: relative; overflow: hidden; background: hsl(var(--muted)); }
-    .p-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-    .p-card:hover .p-img-wrapper img { transform: scale(1.1); }
-    
-    /* Badge Integrada */
-    .p-badge { 
-        position: absolute; top: 12px; left: 12px; 
-        background: hsla(var(--primary), 0.9); 
-        backdrop-filter: blur(4px);
-        color: hsl(var(--primary-foreground)); 
-        font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; z-index: 10; 
-    }
-
-    .p-data { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-    .p-name { 
-        margin: 0; min-height: 42px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; line-height: 1.5; 
-    }
-    .p-price { font-size: 17px; font-weight: 800; color: hsl(var(--text-primary)); margin: 0; }
-    
-    /* Botão de Alta Conversão */
-    .btn-buy-sq { 
-        height: 46px; width: 100%; 
-        background: hsl(var(--primary)); 
-        color: hsl(var(--primary-foreground)); 
-        border: none; border-radius: var(--radius-button); 
-        font-weight: 700; font-size: 14px; 
-        display: flex; align-items: center; justify-content: center; gap: 8px; 
-        text-decoration: none; margin-top: auto; transition: all 0.2s;
-        box-shadow: 0 4px 10px hsla(var(--primary), 0.2);
-    }
-    .btn-buy-sq:hover { filter: brightness(1.1); box-shadow: 0 6px 15px hsla(var(--primary), 0.3); }
-
-    /* --- 5. MICRO-INTERAÇÕES PREMIUM --- */
-    @keyframes pulse-soft {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.015); box-shadow: 0 0 15px hsla(var(--primary), 0.2); }
-        100% { transform: scale(1); }
-    }
-    .p-low-stock { animation: pulse-soft 2s infinite ease-in-out; border-color: hsla(var(--primary), 0.4) !important; }
-
-    .btn-buy-sq:active { transform: scale(0.95); transition: 0.1s; }
-    
-    @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Remove bootstrap conflicts in vitrine */
+body { background-color: theme('colors.background'); font-family: 'Inter', sans-serif; }
+.hero-gradient { background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="animate-fade-in">
-    <!-- 1. HERO (Legibilidade e Glass Effect) -->
-    <div class="hero-box">
-        {% if loja and loja.banner_topo %}
-            <img src="{{ loja.banner_topo.url }}" class="hero-img" alt="{{ loja.nome }}">
-        {% else %}
-            <div class="hero-img d-flex align-items-center justify-content-center bg-light">
-                <i class="bi bi-shop fs-1 opacity-25"></i>
-            </div>
-        {% endif %}
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <span style="font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: rgba(255,255,255,0.8);">Exclusividade</span>
-            <h2 class="font-heading mb-0" style="font-size: 26px; font-weight: 800;">{{ loja.subtitulo_loja|default:"Coleção Premium" }}</h2>
-            <div class="d-flex align-items-center gap-3 mt-1">
-                {% if loja.instagram_url %}
-                    <a href="{{ loja.instagram_url }}" target="_blank" style="color: white; font-size: 18px;"><i class="bi bi-instagram"></i></a>
-                {% endif %}
-                {% if loja.facebook_url %}
-                    <a href="{{ loja.facebook_url }}" target="_blank" style="color: white; font-size: 18px;"><i class="bi bi-facebook"></i></a>
-                {% endif %}
-                <a href="https://wa.me/{{ loja.whatsapp_numero }}" target="_blank" style="color: white; font-size: 18px;"><i class="bi bi-whatsapp"></i></a>
-            </div>
-            <a href="#" class="mt-2" style="font-size: 13px; font-weight: 600; color: white; text-decoration: none; opacity: 0.8;">Ver Catálogo Completo <i class="bi bi-arrow-right-short"></i></a>
-        </div>
-    </div>
+<div class="app-container pb-20 font-sans text-foreground pb-safe">
+    
+    <!-- HEADER -->
+    <header class="flex items-center justify-between p-4 bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-border">
+        <h1 class="font-heading font-bold text-lg text-text-primary">{{ loja.nome }}</h1>
+        <a href="#" class="relative cursor-pointer transition-transform active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-primary"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-[6px] py-[2px] rounded-full">{% if itens_carrinho %}{{ itens_carrinho }}{% else %}0{% endif %}</span>
+        </a>
+    </header>
 
-    <!-- 2. HIGHLIGHTS (Stories com Respiro) -->
-    <div class="highlight-container no-scrollbar">
-        {% for cat in categorias %}
-            {% if cat.mostrar_estilo_story %}
-            <a href="?cat={{ cat.id }}" class="highlight-item {% if request.GET.cat == cat.id|stringformat:'i' %}active{% endif %}">
-                <div class="highlight-circle">
-                    {% if cat.imagem %}
-                        <img src="{{ cat.imagem.url }}" alt="{{ cat.nome }}">
-                    {% else %}
-                        <div class="highlight-placeholder">
-                            <i class="bi {{ cat.icone }}"></i>
+    <main class="space-y-6 py-4">
+        
+        <!-- HERO / PROFILE (StoreProfile.tsx clone) -->
+        <section class="px-4">
+            <div class="bg-card rounded-2xl border border-border shadow-sm overflow-hidden relative">
+                <div class="h-24 w-full {% if loja.banner_topo %}bg-cover bg-center{% else %}hero-gradient{% endif %}" {% if loja.banner_topo %}style="background-image: url('{{ loja.banner_topo.url }}')"{% endif %}></div>
+                
+                <div class="px-5 pb-5 -mt-10">
+                    <div class="flex items-end gap-3 mb-4">
+                        <div class="w-20 h-20 rounded-2xl border-4 border-card bg-gray-100 flex items-center justify-center shadow-md overflow-hidden bg-white shrink-0">
+                            {% if loja.logo %}
+                            <img src="{{ loja.logo.url }}" alt="{{ loja.nome }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <span class="text-2xl font-heading font-bold text-primary">{{ loja.nome|slice:":2"|upper }}</span>
+                            {% endif %}
                         </div>
-                    {% endif %}
-                </div>
-                <span class="highlight-label">{{ cat.nome }}</span>
-            </a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    <!-- 2. CATEGORY CHIPS (Mais Evidente) -->
-    <div class="chips-container no-scrollbar">
-        <a href="?" class="chip-item {% if not request.GET.cat %}active{% endif %}">Todos</a>
-        {% for cat in categorias %}
-            <a href="?cat={{ cat.id }}" class="chip-item {% if request.GET.cat == cat.id|stringformat:'i' %}active{% endif %}">
-                {{ cat.nome }}
-            </a>
-        {% endfor %}
-    </div>
-
-    <!-- 3. & 4. SECTION TITLE & PRODUCTS GRID -->
-    <div class="section-products">
-        <div class="d-flex align-items-center justify-content-between px-4 mb-3">
-            <h3 class="font-heading mb-0" style="font-size: 20px; font-weight: 800;">Destaques</h3>
-            <span class="text-muted" style="font-size: 12px;">{{ produtos|length }} itens</span>
-        </div>
-
-        <div class="p-grid">
-            {% for produto in produtos %}
-            <div class="p-card group {% if produto.estoque < 5 %}p-low-stock{% endif %}">
-                <div class="p-img-wrapper">
-                    {% if produto.estoque < 5 %}
-                        <span class="p-badge" style="background: linear-gradient(45deg, #ef4444, #f97316); border: none;">🔥 ÚLTIMAS UNIDADES</span>
-                    {% endif %}
-                    {% if produto.imagem %}
-                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
-                    {% else %}
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: hsl(var(--secondary)); color: hsl(var(--text-secondary));">
-                            <i class="bi bi-image opacity-25 fs-1"></i>
+                        <div class="flex-1 pb-1">
+                            <div class="flex items-center gap-1.5">
+                                <h3 class="text-lg font-heading font-bold text-text-primary leading-none">{{ loja.nome }}</h3>
+                                <!-- Verified Badge -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-primary"><path d="M10.94 1.48a1.5 1.5 0 0 1 2.12 0l1.24 1.24a1.5 1.5 0 0 0 1.06.44h1.76a1.5 1.5 0 0 1 1.5 1.5v1.76a1.5 1.5 0 0 0 .44 1.06l1.24 1.24a1.5 1.5 0 0 1 0 2.12l-1.24 1.24a1.5 1.5 0 0 0-.44 1.06v1.76a1.5 1.5 0 0 1-1.5 1.5h-1.76a1.5 1.5 0 0 0-1.06.44l-1.24 1.24a1.5 1.5 0 0 1-2.12 0l-1.24-1.24a1.5 1.5 0 0 0-1.06-.44H7.1a1.5 1.5 0 0 1-1.5-1.5v-1.76a1.5 1.5 0 0 0-.44-1.06L3.92 13.06a1.5 1.5 0 0 1 0-2.12l1.24-1.24a1.5 1.5 0 0 0 .44-1.06V6.88a1.5 1.5 0 0 1 1.5-1.5h1.76a1.5 1.5 0 0 0 1.06-.44L10.94 1.48ZM15.53 9.47a.75.75 0 0 0-1.06-1.06l-4 4-1.47-1.47a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l4.5-4.5Z"/></svg>
+                            </div>
+                            <p class="text-xs text-text-secondary mt-1">{{ loja.subtitulo_loja|default:"Loja Oficial" }}</p>
                         </div>
-                    {% endif %}
+                    </div>
+
+                    <p class="text-sm text-text-primary whitespace-pre-line leading-relaxed mb-4">{{ loja.descricao|default:"Bem-vindo à nossa loja! Confira nossos produtos exclusivos nas prateleiras abaixo." }}</p>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://wa.me/{{ loja.whatsapp_numero|default:'' }}" target="_blank" class="flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-text-primary py-2.5 rounded-button text-sm font-semibold transition-colors border border-border">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            WhatsApp
+                        </a>
+                        {% if loja.instagram_url %}
+                        <a href="{{ loja.instagram_url }}" target="_blank" class="flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-text-primary py-2.5 rounded-button text-sm font-semibold transition-colors border border-border">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                            Instagram
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="p-data">
-                    <h4 class="p-name">{{ produto.nome }}</h4>
-                    <p class="p-price">R$ {{ produto.preco|floatformat:2 }}</p>
+            </div>
+        </section>
+
+        <!-- HIGHLIGHTS / CATEGORIES (HighlightCarousel.tsx clone) -->
+        <section>
+            <div class="px-4 mb-3"><h2 class="font-heading font-bold text-lg text-text-primary">Categorias</h2></div>
+            <div class="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-2">
+                <a href="?" class="flex-shrink-0 flex flex-col items-center gap-2 group">
+                    <div class="w-16 h-16 rounded-full border-2 border-primary p-[3px] transition-transform group-active:scale-95">
+                        <div class="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">ALL</div>
+                    </div>
+                    <span class="text-[11px] font-semibold text-text-primary">Todos</span>
+                </a>
+                {% for cat in categorias %}
+                <a href="?cat={{ cat.id }}" class="flex-shrink-0 flex flex-col items-center gap-2 group">
+                    <div class="w-16 h-16 rounded-full border-2 border-border p-[3px] transition-transform group-active:scale-95 {% if request.GET.cat == cat.id|stringformat:'i' %}border-primary{% endif %}">
+                        {% if cat.imagem %}
+                        <img src="{{ cat.imagem.url }}" alt="{{ cat.nome }}" class="w-full h-full rounded-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-text-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                        {% endif %}
+                    </div>
+                    <span class="text-[11px] font-semibold text-text-primary truncate max-w-[64px]">{{ cat.nome }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- PRODUCTS GRID (ProductCard.tsx clone) -->
+        <section class="px-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-heading font-bold text-lg text-text-primary mb-0">Destaques</h2>
+                <span class="text-xs font-semibold text-text-secondary bg-gray-100 px-2 py-1 rounded-md">{{ produtos|length }} itens</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+                {% for produto in produtos %}
+                <div class="group flex flex-col rounded-card bg-surface shadow-sm hover:shadow-md border border-border overflow-hidden transition-all">
+                    <div class="relative aspect-[4/5] bg-gray-100 overflow-hidden">
+                        {% if produto.imagem %}
+                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                        {% else %}
+                        <div class="h-full w-full flex items-center justify-center text-gray-300"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>
+                        {% endif %}
+                        
+                        {% if produto.estoque < 5 %}
+                        <span class="absolute left-2 top-2 rounded-button bg-red-500 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-sm">Raro</span>
+                        {% endif %}
+                    </div>
                     
-                    <a href="{% url 'add_carrinho' loja.slug produto.id %}" class="btn-buy-sq">
-                        <i class="bi bi-bag-plus"></i> Comprar
-                    </a>
+                    <div class="flex flex-1 flex-col gap-1.5 p-3">
+                        <h3 class="text-[13px] font-medium text-text-primary line-clamp-2 leading-tight h-[36px]">{{ produto.nome }}</h3>
+                        <p class="text-base font-bold text-text-primary mt-1">R$ {{ produto.preco|floatformat:2 }}</p>
+                        
+                        <a href="{% url 'add_carrinho' loja.slug produto.id %}" class="mt-auto flex h-[40px] w-full items-center justify-center gap-2 rounded-button bg-primary text-sm font-semibold tracking-wide text-white transition-colors hover:bg-primary-hover active:scale-[0.98]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            Comprar
+                        </a>
+                    </div>
                 </div>
+                {% empty %}
+                <div class="col-span-2 flex flex-col items-center justify-center py-16 text-text-secondary bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-30 mb-3"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                    <p class="text-sm font-medium">Nenhum produto cadastrado.</p>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </div>
+        </section>
+    </main>
 </div>
-{% endblock %}
 
-
-{% block extrajs %}
 <script>
-    // --- UX PREMIUM: MOUSE WHEEL TO HORIZONTAL ---
-    function enableWheelScroll(el) {
-        if (!el) return;
-        el.addEventListener('wheel', (evt) => {
+    // Enable horizontal scroll with mouse wheel for categories
+    const container = document.querySelector('.no-scrollbar');
+    if(container) {
+        container.addEventListener('wheel', (evt) => {
             evt.preventDefault();
-            el.scrollLeft += evt.deltaY * 0.5; // Ajuste de sensibilidade
+            container.scrollLeft += evt.deltaY;
         }, { passive: false });
     }
-
-    // Ativando nos dois menus de categorias
-    enableWheelScroll(document.querySelector('.highlight-container'));
-    enableWheelScroll(document.querySelector('.chips-container'));
 </script>
 {% endblock %}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ store.nome }}</title>
+    <title>{{ loja.nome }}</title>
     
     <!-- GOOGLE FONTS -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=PT+Serif:wght@400;700&family=Archivo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -23,9 +23,9 @@
 
 <header class="nav {{ tema.alinhamento_logo }}">
     <div class="container nav-content" style="padding: 20px; border-bottom: 2px solid #000; margin-bottom: 30px;">
-        <h1 class="logo" style="text-transform: uppercase;">{{ store.nome }}</h1>
+        <h1 class="logo" style="text-transform: uppercase;">{{ loja.nome }}</h1>
         <div class="nav-actions">
-            <a href="https://wa.me/{{ store.whatsapp_numero }}" class="cart" target="_blank">CARRINHO</a>
+            <a href="https://wa.me/{{ loja.whatsapp_numero }}" class="cart" target="_blank">CARRINHO</a>
         </div>
     </div>
 </header>
@@ -44,7 +44,7 @@
                 <div class="product-info">
                     <h3 class="product-title">{{ product.nome }}</h3>
                     <div class="product-price">R$ {{ product.preco }}</div>
-                    <a href="https://wa.me/{{ store.whatsapp_numero }}?text=Quero%20comprar%20{{ product.nome }}" target="_blank" class="btn-buy">
+                    <a href="https://wa.me/{{ loja.whatsapp_numero }}?text=Quero%20comprar%20{{ product.nome }}" target="_blank" class="btn-buy">
                         ADICIONAR
                     </a>
                 </div>
@@ -55,7 +55,7 @@
 </main>
 
 <footer class="footer" style="margin-top: 60px; padding: 40px; background: #eee; text-align: center; font-weight: 700;">
-    <p>© COPYRIGHT {{ store.nome }}</p>
+    <p>© COPYRIGHT {{ loja.nome }}</p>
 </footer>
 
 </body>

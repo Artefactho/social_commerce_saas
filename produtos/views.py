@@ -81,10 +81,13 @@ def vitrine_view(request, loja_slug=None):
         template_name = f'vitrines/{loja.template.slug}.html'
     else:
         template_name = 'vitrines/default.html'
+        
+    print(f"DEBUG: loja slug={loja.slug}, template={loja.template}, template_name={template_name}")
+    
     
     try:
         get_template(template_name)
-    except (TemplateDoesNotExist, Exception):
+    except TemplateDoesNotExist:
         template_name = 'vitrines/default.html'
         
     return render(request, template_name, context)

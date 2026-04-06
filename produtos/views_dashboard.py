@@ -202,15 +202,31 @@ def deletar_produto(request, loja_slug, produto_id):
 def editar_template(request, loja_slug):
     loja = get_object_or_404(Loja, slug=loja_slug, owner=request.user)
     # Garantir existência do tema
-    from .models import TemaLoja
+    from .models import TemaLoja, Template
     tema, _ = TemaLoja.objects.get_or_create(loja=loja)
+    templates_disponiveis = Template.objects.all()
     
     if request.method == 'POST':
         # Campos básicos permitidos para todos
+        template_id = request.POST.get('template_id')
+        if template_id:
+            try:
+                loja.template = Template.objects.get(id=template_id)
+                loja.save()
+            except Template.DoesNotExist:
+                pass
+
         tema.cor_primaria = request.POST.get('cor_primaria', tema.cor_primaria)
         tema.cor_secundaria = request.POST.get('cor_secundaria', tema.cor_secundaria)
         tema.mostrar_banner = 'mostrar_banner' in request.POST
-        tema.qtd_produtos_home = int(request.POST.get('qtd_produtos_home', 6))
+        
+        # Correção para QTD Produtos (evita crash se vier vazio)
+        qtd = request.POST.get('qtd_produtos_home')
+        try:
+            tema.qtd_produtos_home = int(qtd) if qtd else 6
+        except (ValueError, TypeError):
+            tema.qtd_produtos_home = 6
+
         
         # Bloqueio de BACKEND para plano Basic
         if loja.plano != 'basic':
@@ -226,12 +242,17 @@ def editar_template(request, loja_slug):
             tema.fonte_familia = 'sans'
         
         tema.save()
-        messages.success(request, "Aparência da loja atualizada com sucesso!")
+        messages.success(request, f"🎨 Aparência da loja '{loja.nome}' atualizada! Template atual: {loja.template.nome if loja.template else 'Padrão'}")
+        
+        # Se for um lojista comum, manda pro dashboard. Se for admin, volta pro tema or admin
+        if request.user.is_staff and 'admin' in request.path:
+             return redirect('saas_admin')
         return redirect('dashboard_loja', loja_slug=loja.slug)
         
     return render(request, 'produtos/editar_template.html', {
         'loja': loja, 
         'tema': tema,
+        'templates_disponiveis': templates_disponiveis,
         'can_edit_pro': loja.plano != 'basic'
     })
 
@@ -261,7 +282,7 @@ def saas_admin(request):
             loja_obj.template = template_obj
             
         loja_obj.save()
-        messages.success(request, f"Configurações da loja {loja_obj.nome} atualizadas com sucesso!")
+        messages.success(request, f"🚀 Loja {loja_obj.nome} atualizada! Plano: {loja_obj.plano.upper()} | Template: {loja_obj.template.nome if loja_obj.template else 'Nenhum'}")
         return redirect('saas_admin')
 
     return render(request, 'admin/admin_lojas.html', {'lojas': lojas, 'templates': templates})

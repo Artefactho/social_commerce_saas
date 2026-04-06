@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ store.nome }}</title>
+    <title>{{ loja.nome }}</title>
     
     <!-- GOOGLE FONTS -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Lora:wght@400;700&family=Manrope:wght@400;700&display=swap" rel="stylesheet">
@@ -23,17 +23,17 @@
 
 <header class="nav fixed {{ tema.alinhamento_logo }}">
     <div class="container nav-content" style="display: flex; align-items: center; justify-content: space-between; padding: 15px;">
-        <h1 class="logo" style="margin: 0; font-size: 20px; font-weight: 800;">{{ store.nome }}</h1>
+        <h1 class="logo" style="margin: 0; font-size: 20px; font-weight: 800;">{{ loja.nome }}</h1>
         <div class="nav-actions">
-            <a href="https://wa.me/{{ store.whatsapp_numero }}" class="cart" target="_blank" style="text-decoration: none;">🛒</a>
+            <a href="https://wa.me/{{ loja.whatsapp_numero }}" class="cart" target="_blank" style="text-decoration: none;">🛒</a>
         </div>
     </div>
 </header>
 
 <main>
-    {% if tema.mostrar_banner and store.banner_topo %}
+    {% if tema.mostrar_banner and loja.banner_topo %}
     <section class="banner" style="padding: 10px;">
-        <div class="img-banner" style="background-image: url('{{ store.banner_topo.url }}'); height: 200px; background-size: cover; background-position: center; border-radius: 15px;"></div>
+        <div class="img-banner" style="background-image: url('{{ loja.banner_topo.url }}'); height: 200px; background-size: cover; background-position: center; border-radius: 15px;"></div>
     </section>
     {% endif %}
 
@@ -45,7 +45,7 @@
                 <div class="product-info">
                     <h3 class="product-title">{{ product.nome }}</h3>
                     <div class="product-price">R$ {{ product.preco }}</div>
-                    <a href="https://wa.me/{{ store.whatsapp_numero }}?text=Quero%20comprar%20{{ product.nome }}" target="_blank" class="btn-buy">
+                    <a href="https://wa.me/{{ loja.whatsapp_numero }}?text=Quero%20comprar%20{{ product.nome }}" target="_blank" class="btn-buy">
                         Comprar
                     </a>
                 </div>
@@ -56,7 +56,7 @@
 </main>
 
 <footer class="footer" style="padding: 40px 0; text-align: center; font-size: 12px; color: #aaa;">
-    <p>© {{ store.nome }} - Minimalist Style</p>
+    <p>© {{ loja.nome }} - Minimalist Style</p>
 </footer>
 
 </body>

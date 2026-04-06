@@ -16,12 +16,12 @@ Bem-vindo ao seu ecossistema de vendas online! Este guia explica como operar a s
 Abra o navegador do celular e acesse:
 
 ```
-http://192.168.1.3:8000/jo/
+http://192.168.1.3:8000/loja-da-jo/
 ```
 
 | O que acessar | URL no Celular |
 |---|---|
-| 🛍️ **Vitrine da Jô Perfumes** | http://192.168.1.3:8000/jo/ |
+| 🛍️ **Vitrine da Jô Perfumes** | http://192.168.1.3:8000/loja-da-jo/ |
 | 🏠 Landing Page SaaS | http://192.168.1.3:8000/ |
 | 🛍️ Vitrine Loja Root | http://192.168.1.3:8000/loja-root/ |
 | 🔑 Login | http://192.168.1.3:8000/accounts/login/ |
@@ -32,8 +32,8 @@ http://192.168.1.3:8000/jo/
 
 | ❌ NÃO funciona no celular | ✅ Funciona no celular |
 |---|---|
-| `http://127.0.0.1:8000/jo/` | `http://192.168.1.3:8000/jo/` |
-| `http://127.0.0.1:8000/dashboard/jo/` | `http://192.168.1.3:8000/dashboard/jo/` |
+| `http://127.0.0.1:8000/loja-da-jo/` | `http://192.168.1.3:8000/loja-da-jo/` |
+| `http://127.0.0.1:8000/dashboard/loja-da-jo/` | `http://192.168.1.3:8000/dashboard/loja-da-jo/` |
 | `http://127.0.0.1:8000/admin/` | `http://192.168.1.3:8000/admin/` |
 | `http://127.0.0.1:8000/accounts/login/` | `http://192.168.1.3:8000/accounts/login/` |
 
@@ -123,7 +123,7 @@ python manage.py runserver 0.0.0.0:8000
 3. Digite o endereço:
 
 ```
-http://192.168.1.3:8000/jo/
+http://192.168.1.3:8000/loja-da-jo/
 ```
 
 > 💡 **Dica:** Salve nos favoritos do celular para não precisar digitar toda vez!
@@ -135,13 +135,13 @@ http://192.168.1.3:8000/jo/
 | O que acessar | URL |
 |---|---|
 | 🏠 Landing Page SaaS | http://127.0.0.1:8000/ |
-| 🛍️ Vitrine da Jô Perfumes | http://127.0.0.1:8000/jo/ |
+| 🛍️ Vitrine da Jô Perfumes | http://127.0.0.1:8000/loja-da-jo/ |
 | 🛍️ Vitrine Loja Root | http://127.0.0.1:8000/loja-root/ |
 | ➕ Cadastro de Nova Loja | http://127.0.0.1:8000/pj/cadastro/ |
 | 🔑 Login | http://127.0.0.1:8000/accounts/login/ |
 | 📊 Dashboard (atalho) | http://127.0.0.1:8000/dashboard/entrar/ |
 | 📊 Dashboard Loja Root | http://127.0.0.1:8000/dashboard/loja-root/ |
-| 📊 Dashboard Jô Perfumes | http://127.0.0.1:8000/dashboard/jo/ |
+| 📊 Dashboard Jô Perfumes | http://127.0.0.1:8000/dashboard/loja-da-jo/ |
 | ⚙️ Admin Django | http://127.0.0.1:8000/admin/ |
 
 ---
@@ -161,7 +161,7 @@ http://192.168.1.3:8000/jo/
 | Loja | Slug | Vitrine (PC) | Vitrine (Celular) | Dashboard |
 |---|---|---|---|---|
 | Loja Root | `loja-root` | http://127.0.0.1:8000/loja-root/ | http://192.168.1.3:8000/loja-root/ | http://127.0.0.1:8000/dashboard/loja-root/ |
-| Jô Perfumes | `jo` | http://127.0.0.1:8000/jo/ | http://192.168.1.3:8000/jo/ | http://127.0.0.1:8000/dashboard/jo/ |
+| Jô Perfumes | `loja-da-jo` | http://127.0.0.1:8000/loja-da-jo/ | http://192.168.1.3:8000/loja-da-jo/ | http://127.0.0.1:8000/dashboard/loja-da-jo/ |
 
 ---
 

@@ -3,7 +3,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from produtos import views, views_checkout, views_dashboard
+from produtos import views, views_checkout, views_dashboard, api_views
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     # Dashboard / Admin
@@ -34,6 +35,14 @@ urlpatterns = [
     # NOVAS ROTAS DE CHECKOUT E WEBHOOK SaaS
     path('<slug:loja_slug>/checkout/finalizar/', views_checkout.finalizar_carrinho, name='finalizar_carrinho'),
     path('api/webhook/pagamento/<slug:loja_slug>/', views_checkout.webhook_pagamento, name='webhook_pagamento'),
+
+    # ======= API & JWT AUTH =======
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/auth/register/', api_views.auth_register, name='api_auth_register'),
+    path('api/users/me/', api_views.auth_me, name='api_auth_me'),
+    # ==============================
+
 
     path('<slug:loja_slug>/', views.vitrine_view, name='vitrine_loja'),
     path('<slug:loja_slug>/carrinho/', views.ver_carrinho, name='ver_carrinho'),

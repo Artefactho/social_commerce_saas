@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ store.nome }}</title>
+    <title>{{ loja.nome }}</title>
     
     <!-- GOOGLE FONTS -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
     </style>
 </head>
 
-<body class="font-{{ tema.fonte_familia }}">
+<body class="font-{{ tema.font_familia }}">
 
 <nav class="highlight-container no-scrollbar">
     <a href="?" class="highlight-pill {% if not request.GET.cat %}active{% endif %}">Todos</a>
@@ -32,19 +32,19 @@
 
 <header class="nav {{ tema.alinhamento_logo }}">
     <div class="container nav-content">
-        <h1 class="logo">{{ store.nome }}</h1>
+        <h1 class="logo">{{ loja.nome }}</h1>
         <div class="nav-actions">
-            <a href="https://wa.me/{{ store.whatsapp_numero }}" class="cart" target="_blank" style="text-decoration: none; font-size: 20px;">🛒</a>
+            <a href="https://wa.me/{{ loja.whatsapp_numero }}" class="cart" target="_blank" style="text-decoration: none; font-size: 20px;">🛒</a>
         </div>
     </div>
 </header>
 
 <main>
-    {% if tema.mostrar_banner and store.banner_topo %}
-    <section class="hero" style="background-image: url('{{ store.banner_topo.url }}');">
+    {% if tema.mostrar_banner and loja.banner_topo %}
+    <section class="hero" style="background-image: url('{{ loja.banner_topo.url }}');">
         <div class="overlay">
-            <h2>{{ store.nome }}</h2>
-            <p>{{ store.subtitulo_loja|default:"" }}</p>
+            <h2>{{ loja.nome }}</h2>
+            <p>{{ loja.subtitulo_loja|default:"" }}</p>
         </div>
     </section>
     {% endif %}
@@ -63,7 +63,7 @@
                 <div class="product-info">
                     <h3 class="product-title">{{ product.nome }}</h3>
                     <div class="product-price">R$ {{ product.preco|floatformat:2 }}</div>
-                    <a href="https://wa.me/{{ store.whatsapp_numero }}?text=Quero%20comprar%20{{ product.nome }}" target="_blank" class="btn-buy">
+                    <a href="https://wa.me/{{ loja.whatsapp_numero }}?text=Quero%20comprar%20{{ product.nome }}" target="_blank" class="btn-buy">
                         Comprar agora
                     </a>
                 </div>
@@ -74,7 +74,7 @@
 </main>
 
 <footer class="footer">
-    <p>© {{ store.nome }} - Desenvolvido com Antigravity</p>
+    <p>© {{ loja.nome }} - Desenvolvido com Antigravity</p>
 </footer>
 
 </body>
