@@ -1,0 +1,69 @@
+/* STUDIO.CSS - CREATIVE & ARTISTIC */
+:root {
+    --primary: #f33;
+    --secondary: #000000;
+    --bg-light: #fff;
+}
+
+body.font-sans { font-family: 'Space Grotesk', sans-serif; }
+body.font-serif { font-family: 'Cormorant Garamond', serif; }
+body.font-modern { font-family: 'Syne', sans-serif; }
+
+.nav.centro .nav-content { text-align: center; display: block; padding-bottom: 20px; }
+.nav.centro .logo { margin: 0 auto; display: block; }
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 10px;
+}
+
+.product-card {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.product-img {
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    filter: grayscale(0.2);
+    transition: filter 0.4s;
+}
+
+.product-card:hover .product-img {
+    filter: grayscale(0);
+}
+
+.product-info {
+    text-align: left;
+}
+
+.product-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    letter-spacing: -0.5px;
+    color: #111;
+}
+
+.product-price {
+    font-size: 20px;
+    font-weight: 900;
+    color: #000;
+}
+
+.btn-buy {
+    color: #000;
+    text-decoration: underline;
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-block;
+    margin-top: 10px;
+    background: transparent;
+    border: none;
+    padding: 0;
+}

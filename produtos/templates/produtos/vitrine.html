@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block extrastyle %}
+<style>
+    /* --- 4. SPACING & NIVEIS (RESPIIRO VISUAL) --- */
+    .animate-fade-in { display: flex; flex-direction: column; gap: 32px; padding-bottom: 60px; }
+
+    /* --- 1. HERO (CONTRASTE E GLASS EFFECT) --- */
+    .hero-box { 
+        margin: 0 16px; 
+        position: relative; 
+        aspect-ratio: 16/9; 
+        border-radius: var(--radius-card-lg); 
+        overflow: hidden; 
+        box-shadow: var(--shadow-lg); 
+    }
+    .hero-img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-overlay { 
+        position: absolute; 
+        inset: 0; 
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 100%); 
+    }
+    .hero-content { 
+        position: absolute; 
+        bottom: 20px; left: 20px; right: 20px; 
+        padding: 20px; 
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: var(--radius-card);
+        color: white; 
+        display: flex; flex-direction: column; gap: 4px;
+    }
+
+    /* --- 2. HIGHLIGHTS (USO ESTRATÉGICO DE COR) --- */
+    .highlight-container { display: flex; gap: 16px; overflow-x: auto; padding: 0 20px 4px; scroll-behavior: smooth; }
+    .highlight-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; width: 72px; }
+    
+    .highlight-circle { 
+        width: 66px; height: 66px; border-radius: 50%; 
+        border: 2.5px solid hsl(var(--primary)); /* Sempre na cor do tema */
+        padding: 3px; background: hsl(var(--surface)); 
+        transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex; align-items: center; justify-content: center;
+    }
+    /* Ativo: escala e sombra */
+    .highlight-item.active .highlight-circle { 
+        transform: scale(1.08);
+        box-shadow: 0 0 0 3px hsla(var(--primary), 0.2);
+    }
+    /* Placeholder de ícone */
+    .highlight-placeholder {
+        width: 100%; height: 100%; border-radius: 50%;
+        background: hsla(var(--primary), 0.08);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; color: hsl(var(--primary));
+    }
+    .highlight-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .highlight-label { font-size: 11px; font-weight: 600; color: hsl(var(--text-secondary)); text-align: center; }
+
+    /* --- 2. CATEGORY CHIPS (MAIS EVIDENTE NO ATIVO) --- */
+    .chips-container { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px; }
+    .chip-item { 
+        flex: 0 0 auto; 
+        background: hsl(var(--secondary)); 
+        color: hsl(var(--text-secondary)); 
+        padding: 10px 22px; 
+        border-radius: var(--radius-button); 
+        font-size: 14px; font-weight: 600; 
+        text-decoration: none; transition: all 0.2s; 
+    }
+    .chip-item.active { 
+        background: hsl(var(--primary)); 
+        color: hsl(var(--primary-foreground)); 
+        box-shadow: 0 4px 12px hsla(var(--primary), 0.3);
+        transform: scale(1.05);
+    }
+
+    /* --- 3. PRODUCT CARDS (HIERARQUIA E CONVERSÃO) --- */
+    .p-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 16px; }
+    .p-card { 
+        background: hsl(var(--surface)); 
+        border-radius: var(--radius-card); 
+        border: 1px solid hsl(var(--border)); 
+        box-shadow: var(--shadow-sm); 
+        display: flex; flex-direction: column; 
+        overflow: hidden; transition: all 0.3s; 
+    }
+    .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    
+    .p-img-wrapper { aspect-ratio: 1/1; position: relative; overflow: hidden; background: hsl(var(--muted)); }
+    .p-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .p-card:hover .p-img-wrapper img { transform: scale(1.1); }
+    
+    /* Badge Integrada */
+    .p-badge { 
+        position: absolute; top: 12px; left: 12px; 
+        background: hsla(var(--primary), 0.9); 
+        backdrop-filter: blur(4px);
+        color: hsl(var(--primary-foreground)); 
+        font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; z-index: 10; 
+    }
+
+    .p-data { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .p-name { 
+        margin: 0; min-height: 42px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; line-height: 1.5; 
+    }
+    .p-price { font-size: 17px; font-weight: 800; color: hsl(var(--text-primary)); margin: 0; }
+    
+    /* Botão de Alta Conversão */
+    .btn-buy-sq { 
+        height: 46px; width: 100%; 
+        background: hsl(var(--primary)); 
+        color: hsl(var(--primary-foreground)); 
+        border: none; border-radius: var(--radius-button); 
+        font-weight: 700; font-size: 14px; 
+        display: flex; align-items: center; justify-content: center; gap: 8px; 
+        text-decoration: none; margin-top: auto; transition: all 0.2s;
+        box-shadow: 0 4px 10px hsla(var(--primary), 0.2);
+    }
+    .btn-buy-sq:hover { filter: brightness(1.1); box-shadow: 0 6px 15px hsla(var(--primary), 0.3); }
+
+    /* --- 5. MICRO-INTERAÇÕES PREMIUM --- */
+    @keyframes pulse-soft {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.015); box-shadow: 0 0 15px hsla(var(--primary), 0.2); }
+        100% { transform: scale(1); }
+    }
+    .p-low-stock { animation: pulse-soft 2s infinite ease-in-out; border-color: hsla(var(--primary), 0.4) !important; }
+
+    .btn-buy-sq:active { transform: scale(0.95); transition: 0.1s; }
+    
+    @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- 1. HERO (Legibilidade e Glass Effect) -->
+    <div class="hero-box">
+        {% if loja and loja.banner_topo %}
+            <img src="{{ loja.banner_topo.url }}" class="hero-img" alt="{{ loja.nome }}">
+        {% else %}
+            <div class="hero-img d-flex align-items-center justify-content-center bg-light">
+                <i class="bi bi-shop fs-1 opacity-25"></i>
+            </div>
+        {% endif %}
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span style="font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: rgba(255,255,255,0.8);">Exclusividade</span>
+            <h2 class="font-heading mb-0" style="font-size: 26px; font-weight: 800;">{{ loja.subtitulo_loja|default:"Coleção Premium" }}</h2>
+            <div class="d-flex align-items-center gap-3 mt-1">
+                {% if loja.instagram_url %}
+                    <a href="{{ loja.instagram_url }}" target="_blank" style="color: white; font-size: 18px;"><i class="bi bi-instagram"></i></a>
+                {% endif %}
+                {% if loja.facebook_url %}
+                    <a href="{{ loja.facebook_url }}" target="_blank" style="color: white; font-size: 18px;"><i class="bi bi-facebook"></i></a>
+                {% endif %}
+                <a href="https://wa.me/{{ loja.whatsapp_numero }}" target="_blank" style="color: white; font-size: 18px;"><i class="bi bi-whatsapp"></i></a>
+            </div>
+            <a href="#" class="mt-2" style="font-size: 13px; font-weight: 600; color: white; text-decoration: none; opacity: 0.8;">Ver Catálogo Completo <i class="bi bi-arrow-right-short"></i></a>
+        </div>
+    </div>
+
+    <!-- 2. HIGHLIGHTS (Stories com Respiro) -->
+    <div class="highlight-container no-scrollbar">
+        {% for cat in categorias %}
+            {% if cat.mostrar_estilo_story %}
+            <a href="?cat={{ cat.id }}" class="highlight-item {% if request.GET.cat == cat.id|stringformat:'i' %}active{% endif %}">
+                <div class="highlight-circle">
+                    {% if cat.imagem %}
+                        <img src="{{ cat.imagem.url }}" alt="{{ cat.nome }}">
+                    {% else %}
+                        <div class="highlight-placeholder">
+                            <i class="bi {{ cat.icone }}"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <span class="highlight-label">{{ cat.nome }}</span>
+            </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- 2. CATEGORY CHIPS (Mais Evidente) -->
+    <div class="chips-container no-scrollbar">
+        <a href="?" class="chip-item {% if not request.GET.cat %}active{% endif %}">Todos</a>
+        {% for cat in categorias %}
+            <a href="?cat={{ cat.id }}" class="chip-item {% if request.GET.cat == cat.id|stringformat:'i' %}active{% endif %}">
+                {{ cat.nome }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- 3. & 4. SECTION TITLE & PRODUCTS GRID -->
+    <div class="section-products">
+        <div class="d-flex align-items-center justify-content-between px-4 mb-3">
+            <h3 class="font-heading mb-0" style="font-size: 20px; font-weight: 800;">Destaques</h3>
+            <span class="text-muted" style="font-size: 12px;">{{ produtos|length }} itens</span>
+        </div>
+
+        <div class="p-grid">
+            {% for produto in produtos %}
+            <div class="p-card group {% if produto.estoque < 5 %}p-low-stock{% endif %}">
+                <div class="p-img-wrapper">
+                    {% if produto.estoque < 5 %}
+                        <span class="p-badge" style="background: linear-gradient(45deg, #ef4444, #f97316); border: none;">🔥 ÚLTIMAS UNIDADES</span>
+                    {% endif %}
+                    {% if produto.imagem %}
+                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: hsl(var(--secondary)); color: hsl(var(--text-secondary));">
+                            <i class="bi bi-image opacity-25 fs-1"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="p-data">
+                    <h4 class="p-name">{{ produto.nome }}</h4>
+                    <p class="p-price">R$ {{ produto.preco|floatformat:2 }}</p>
+                    
+                    <a href="{% url 'add_carrinho' loja.slug produto.id %}" class="btn-buy-sq">
+                        <i class="bi bi-bag-plus"></i> Comprar
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extrajs %}
+<script>
+    // --- UX PREMIUM: MOUSE WHEEL TO HORIZONTAL ---
+    function enableWheelScroll(el) {
+        if (!el) return;
+        el.addEventListener('wheel', (evt) => {
+            evt.preventDefault();
+            el.scrollLeft += evt.deltaY * 0.5; // Ajuste de sensibilidade
+        }, { passive: false });
+    }
+
+    // Ativando nos dois menus de categorias
+    enableWheelScroll(document.querySelector('.highlight-container'));
+    enableWheelScroll(document.querySelector('.chips-container'));
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block extrastyle %}
+<style>
+    .cart-container { padding: 0 16px 120px; }
+    
+    .cart-title { 
+        font-size: 20px; font-weight: 800; margin: 24px 0; 
+        color: hsl(var(--text-primary)); 
+        display: flex; align-items: center; gap: 10px;
+    }
+
+    /* ITEM CARD */
+    .cart-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .cart-item {
+        background: hsl(var(--surface));
+        border-radius: var(--radius-card);
+        border: 1px solid hsl(var(--border));
+        padding: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+    }
+    .cart-item-img {
+        width: 70px; height: 70px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: hsl(var(--muted));
+    }
+    .cart-item-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .cart-item-name { font-size: 14px; font-weight: 700; color: hsl(var(--text-primary)); margin: 0; }
+    .cart-item-price { font-size: 13px; font-weight: 600; color: hsl(var(--text-secondary)); }
+    .cart-item-remove {
+        color: #ef4444; font-size: 12px; font-weight: 700; 
+        text-decoration: none; display: flex; align-items: center; gap: 4px;
+        margin-top: 4px;
+    }
+
+    /* TOTAL SECTION */
+    .cart-summary {
+        background: hsl(var(--secondary));
+        padding: 24px;
+        border-radius: var(--radius-card);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+    .total-label { font-size: 14px; font-weight: 600; color: hsl(var(--text-secondary)); }
+    .total-value { font-size: 22px; font-weight: 800; color: hsl(var(--text-primary)); }
+
+    /* CHECKOUT FORM */
+    .checkout-form { display: flex; flex-direction: column; gap: 20px; }
+    .input-group-custom { display: flex; flex-direction: column; gap: 8px; }
+    .input-group-custom label { font-size: 12px; font-weight: 700; color: hsl(var(--text-secondary)); text-transform: uppercase; }
+    .input-custom {
+        height: 52px;
+        border-radius: var(--radius-button);
+        border: 1px solid hsl(var(--border));
+        padding: 0 16px;
+        font-size: 16px;
+        background: hsl(var(--surface));
+        color: hsl(var(--text-primary));
+        transition: border-color 0.2s;
+    }
+    .input-custom:focus { border-color: hsl(var(--primary)); outline: none; }
+
+    .btn-finalize {
+        height: 56px;
+        background: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+        border-radius: var(--radius-button);
+        border: none;
+        font-size: 15px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        box-shadow: 0 8px 20px hsla(var(--primary), 0.3);
+        text-decoration: none;
+        margin-top: 10px;
+    }
+    .btn-finalize:active { transform: scale(0.98); }
+
+    .btn-back {
+        text-align: center; color: hsl(var(--text-secondary)); font-size: 13px; font-weight: 600; text-decoration: none; display: block; margin-top: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-container animate-fade-in">
+    <h2 class="cart-title">
+        <i class="bi bi-bag-check" style="color: hsl(var(--primary));"></i>
+        Meu Carrinho
+    </h2>
+
+    {% if itens_carrinho %}
+    <div class="cart-list">
+        {% for item in itens_carrinho %}
+        <div class="cart-item">
+            {% if item.produto.imagem %}
+                <img src="{{ item.produto.imagem.url }}" class="cart-item-img" alt="{{ item.produto.nome }}">
+            {% else %}
+                <div class="cart-item-img d-flex align-items-center justify-content-center">
+                    <i class="bi bi-image opacity-25"></i>
+                </div>
+            {% endif %}
+            <div class="cart-item-info">
+                <h3 class="cart-item-name">{{ item.produto.nome }}</h3>
+                <span class="cart-item-price">{{ item.quantidade }}x R$ {{ item.produto.preco|floatformat:2 }}</span>
+                <a href="{% url 'remove_carrinho' loja.slug item.produto.id %}" class="cart-item-remove">
+                    <i class="bi bi-x-circle"></i> Remover
+                </a>
+            </div>
+            <div class="cart-item-subtotal">
+                <span style="font-weight: 800; font-size: 15px;">R$ {{ item.subtotal|floatformat:2 }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cart-summary">
+        <span class="total-label">Subtotal Geral</span>
+        <span class="total-value">R$ {{ total_carrinho|floatformat:2 }}</span>
+    </div>
+
+    <form action="{% url 'finalizar_carrinho' loja.slug %}" method="POST" class="checkout-form">
+        {% csrf_token %}
+        <div class="input-group-custom">
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" name="nome" class="input-custom" required placeholder="Digite seu nome">
+        </div>
+        
+        <div class="input-group-custom">
+            <label for="telefone">WhatsApp</label>
+            <input type="text" id="telefone" name="telefone" class="input-custom" required placeholder="(00) 00000-0000">
+            <span style="font-size: 11px; color: hsl(var(--text-secondary)); margin-top: 4px;">Você receberá os dados do pagamento via WhatsApp.</span>
+        </div>
+
+        <button type="submit" class="btn-finalize">
+            Finalizar Pedido <i class="bi bi-arrow-right"></i>
+        </button>
+    </form>
+
+    <a href="{% url 'vitrine_loja' loja.slug %}" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Continuar Comprando
+    </a>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div style="font-size: 50px; opacity: 0.1; margin-bottom: 16px;"><i class="bi bi-cart-x"></i></div>
+        <h4 class="mb-4" style="font-weight: 700;">Seu carrinho está vazio</h4>
+        <a href="{% url 'vitrine_loja' loja.slug %}" class="btn-finalize" style="display: inline-flex; width: auto; padding: 0 40px;">
+            Ver Coleção
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

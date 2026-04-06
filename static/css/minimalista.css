@@ -1,0 +1,74 @@
+/* MINIMALISTA.CSS - FIXED NAV & CLEAN MOBILE FIRST */
+:root {
+    --primary: #5c3cfb;
+    --secondary: #000000;
+    --bg-light: #fefefe;
+}
+
+body.font-sans { font-family: 'Poppins', sans-serif; }
+body.font-serif { font-family: 'Lora', serif; }
+body.font-modern { font-family: 'Manrope', sans-serif; }
+
+.nav.fixed {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.nav.centro .nav-content { justify-content: center; }
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 8px;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid #f2f2f2;
+}
+
+.product-img {
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.product-info {
+    text-align: left;
+}
+
+.product-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.product-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+}
+
+.btn-buy {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 8px 0;
+    width: 100%;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+    display: block;
+    text-align: center;
+}

@@ -1,0 +1,165 @@
+/* ELEGANTE.CSS - ALTA FIDELIDADE (GLASSMORPHISM & VIBRANCE) */
+:root {
+    --primary-hsl: 340 82% 52%; /* Rosa vibrante original */
+    --surface-glass: rgba(255, 255, 255, 0.7);
+    --border-glass: rgba(255, 255, 255, 0.3);
+    --shadow-premium: 0 10px 30px -5px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+}
+
+body {
+    background: #fdfdfd;
+    color: #111;
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* --- 1. NAV GLASS EFFECT --- */
+.nav {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 18px 20px;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: -1px;
+}
+
+/* --- 2. HERO GLASS BOX --- */
+.hero {
+    margin: 16px;
+    height: 280px;
+    border-radius: 28px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-premium);
+}
+
+.hero .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 30px;
+    color: white;
+}
+
+.hero h2 { font-size: 32px; font-weight: 800; margin: 0; }
+.hero p { opacity: 0.8; font-size: 16px; }
+
+/* --- 3. PRODUCT GRID & CARDS (GLASS & SOUL) --- */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 16px;
+}
+
+.product-card {
+    background: var(--surface-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-premium);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12);
+}
+
+.product-img {
+    aspect-ratio: 1/1;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.6s;
+}
+
+.product-card:hover .product-img {
+    transform: scale(1.08);
+}
+
+.product-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.product-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.4;
+    min-height: 42px;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* --- 4. BUTTONS & PULSE --- */
+.btn-buy {
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: auto;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(225, 29, 120, 0.2);
+}
+
+.btn-buy:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 8px 20px rgba(225, 29, 120, 0.3);
+}
+
+.btn-buy:active { transform: scale(0.95); }
+
+/* --- 5. CATEGORY TABS (PILLS) --- */
+.highlight-container {
+    padding: 20px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+}
+
+.highlight-pill {
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #666;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.highlight-pill.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(225, 29, 120, 0.2);
+}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar no Meu Painel - Social Commerce SaaS{% endblock %}
+
+{% block extrastyle %}
+<style>
+    /* DESATIVAR HEADER/FOOTER DA LOJA NA PÁGINA DE LOGIN */
+    .main-header, .bottom-nav, .theme-capsule { display: none !important; }
+    main { padding-bottom: 0 !important; }
+    .app-shell { max-width: 100% !important; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    
+    .auth-card {
+        background: white; padding: 40px; border-radius: 24px;
+        width: 100%; max-width: 400px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        box-sizing: border-box;
+    }
+
+    @media (max-width: 480px) {
+        .auth-card { padding: 30px 20px; border-radius: 0; border: none; box-shadow: none; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        .app-shell { background: white !important; }
+    }
+    
+    .auth-header { text-align: center; margin-bottom: 32px; }
+    .auth-header h2 { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+    .form-group input {
+        width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 12px;
+        font-size: 15px; transition: 0.2s; background: #fdfdfd;
+    }
+    .form-group input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); background: white; }
+
+    .btn-auth {
+        width: 100%; padding: 16px; background: #3b82f6; color: white; border: none;
+        border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer;
+        transition: 0.2s; margin-top: 10px;
+    }
+    .btn-auth:hover { background: #2563eb; transform: translateY(-1px); }
+
+    .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: #64748b; }
+    .auth-footer a { color: #3b82f6; text-decoration: none; font-weight: 700; }
+
+    .alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; font-weight: 600; text-align: center; }
+    .alert-error { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card animate-fade-in">
+    <div class="auth-header">
+        <div class="logo-sq mx-auto mb-3" style="width: 48px; height: 48px; font-size: 20px; border-radius: 12px; background: #3b82f6;">S</div>
+        <h2>Seja Bem-vindo</h2>
+        <p style="color: #64748b; margin-top: 8px; font-size: 15px;">Acesse seu painel administrativo.</p>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-error">
+        Login ou senha incorretos. Tente novamente.
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>USUÁRIO</label>
+            <input type="text" name="username" required>
+        </div>
+
+        <div class="form-group" style="position: relative;">
+            <label>SENHA</label>
+            <input type="password" name="password" id="id_password" required style="padding-right: 50px;">
+            <button type="button" id="togglePassword" style="position: absolute; right: 8px; top: 32px; border: none; background: none; color: #64748b; cursor: pointer; padding: 10px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-eye" id="eyeIcon" style="font-size: 18px;"></i>
+            </button>
+        </div>
+
+        <button type="submit" class="btn-auth">Entrar no Sistema 🚀</button>
+    </form>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#id_password');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function (e) {
+            // Alternar o tipo de entrada
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Alternar o ícone
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    </script>
+
+    <div class="auth-footer">
+        Ainda não tem conta? <a href="{% url 'signup_merchant' %}">Criar Loja Grátis</a>
+    </div>
+</div>
+{% endblock %}
