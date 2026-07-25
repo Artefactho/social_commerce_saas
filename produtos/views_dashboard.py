@@ -29,10 +29,8 @@ def agentes_ia(request, loja_slug):
     return render(request, 'produtos/agentes.html', context)
 
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import time
 
-@csrf_exempt
 @login_required
 def simular_agente(request):
     if request.method == 'POST':

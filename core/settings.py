@@ -19,13 +19,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+from decouple import config, Csv
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q81ldty(&f*(4cmr@os-eqelz&zod0fm15tz4ms=y9%ehb$csb'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-q81ldty(&f*(4cmr@os-eqelz&zod0fm15tz4ms=y9%ehb$csb')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,192.168.1.3,*', cast=Csv())
 CSRF_TRUSTED_ORIGINS = ['http://192.168.1.3:8000', 'http://127.0.0.1:8000']
 
 

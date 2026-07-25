@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from .models import Loja
 
 @api_view(['POST'])
@@ -23,6 +25,11 @@ def auth_register(request):
         
     if User.objects.filter(username=username).exists():
         return Response({'detail': 'Este nome de usuário já está em uso.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        validate_password(password)
+    except ValidationError as e:
+        return Response({'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
         
     user = User.objects.create(
         username=username,
@@ -50,7 +57,6 @@ def auth_me(request):
             'slug': loja.slug,
             'nome': loja.nome,
             'plano': loja.plano,
-            'status': loja.status
         })
 
     return Response({

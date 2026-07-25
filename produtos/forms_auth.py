@@ -1,7 +1,10 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from .models import Loja
 import re
+
+SLUGS_RESERVADOS = {'admin', 'api', 'dashboard', 'accounts', 'static', 'media', 'pj', 'saas-master-admin', 'login', 'logout'}
 
 class MerchantSignUpForm(forms.ModelForm):
     # --- Seção: Crie sua conta ---
@@ -36,6 +39,12 @@ class MerchantSignUpForm(forms.ModelForm):
         model = User
         fields = ['username', 'email', 'password']
 
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password(password)
+        return password
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
@@ -43,9 +52,12 @@ class MerchantSignUpForm(forms.ModelForm):
         return email
 
     def clean_slug_loja(self):
-        slug = self.cleaned_data.get('slug_loja').lower().strip()
+        slug = self.cleaned_data.get('slug_loja', '').lower().strip()
         # Remove caracteres especiais e espaços
         slug = re.sub(r'[^a-z0-9-]', '', slug.replace(' ', '-'))
+        
+        if slug in SLUGS_RESERVADOS:
+            raise forms.ValidationError("Este nome de link é reservado pela plataforma. Escolha outro.")
         
         if Loja.objects.filter(slug=slug).exists():
             raise forms.ValidationError("Este link de loja (slug) já está em uso. Tente outro nome.")

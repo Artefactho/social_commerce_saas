@@ -1,5 +1,13 @@
 import factory
+from django.contrib.auth.models import User
 from produtos.models import Loja, Produto, Pedido, ItemPedido
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: f"user_{n}")
+    email = factory.Sequence(lambda n: f"user_{n}@example.com")
 
 class LojaFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -15,6 +23,7 @@ class ProdutoFactory(factory.django.DjangoModelFactory):
 
     nome = "Produto Teste"
     marca = "Marca Teste"
+    descricao = "Descrição de teste para o produto"
     preco = 100.00
     estoque = 10
     loja = factory.SubFactory(LojaFactory)

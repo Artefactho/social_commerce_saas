@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 import re
 from .models import Produto, Loja
 
@@ -82,8 +83,6 @@ def vitrine_view(request, loja_slug=None):
     else:
         template_name = 'vitrines/default.html'
         
-    print(f"DEBUG: loja slug={loja.slug}, template={loja.template}, template_name={template_name}")
-    
     
     try:
         get_template(template_name)
@@ -93,6 +92,7 @@ def vitrine_view(request, loja_slug=None):
     return render(request, template_name, context)
 
 
+@require_POST
 def add_carrinho(request, loja_slug, produto_id):
     loja = get_object_or_404(Loja, slug=loja_slug)
     produto = get_object_or_404(Produto, id=produto_id, loja=loja)
@@ -140,7 +140,7 @@ def ver_carrinho(request, loja_slug=None):
     total_carrinho = 0
     
     for p_id_str, qtd in loja_cart.items():
-        produto = get_object_or_404(Produto, id=int(p_id_str))
+        produto = get_object_or_404(Produto, id=int(p_id_str), loja=loja)
         subtotal = produto.preco * qtd
         total_carrinho += subtotal
         itens_carrinho.append({

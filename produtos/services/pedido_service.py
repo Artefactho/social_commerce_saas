@@ -15,7 +15,7 @@ def criar_pedido(loja, cliente_nome, telefone, itens_carinho):
         
         for p_id, qtd in itens_carinho.items():
             # select_for_update() garante consistência em bancos como Postgres. No SQLite é ignorado.
-            produto = Produto.objects.select_for_update().get(id=int(p_id))
+            produto = Produto.objects.select_for_update().get(id=int(p_id), loja=loja)
             if produto.estoque < qtd:
                 raise ValueError(f"Estoque insuficiente para {produto.nome}.")
             
