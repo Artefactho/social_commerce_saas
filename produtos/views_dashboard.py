@@ -273,13 +273,25 @@ def saas_admin(request):
         loja_obj = get_object_or_404(Loja, id=loja_id)
         
         if novo_plano:
-            loja_obj.plano = novo_plano
+            from .models import Plan
+            plan_obj, _ = Plan.objects.get_or_create(
+                nome=novo_plano,
+                defaults={
+                    'max_lojas': 3 if novo_plano == 'pro' else (10 if novo_plano == 'master' else 1),
+                    'max_produtos_por_loja': 50 if novo_plano == 'pro' else (999 if novo_plano == 'master' else 10),
+                    'max_usuarios': 5 if novo_plano == 'pro' else (20 if novo_plano == 'master' else 1),
+                    'preco_mensal': 49.90 if novo_plano == 'pro' else (199.90 if novo_plano == 'master' else 0),
+                }
+            )
+            sub = loja_obj.account.subscription
+            sub.plan = plan_obj
+            sub.save()
             
         if template_id:
             template_obj = get_object_or_404(Template, id=template_id)
             loja_obj.template = template_obj
+            loja_obj.save()
             
-        loja_obj.save()
         messages.success(request, f"🚀 Loja {loja_obj.nome} atualizada! Plano: {loja_obj.plano.upper()} | Template: {loja_obj.template.nome if loja_obj.template else 'Nenhum'}")
         return redirect('saas_admin')
 

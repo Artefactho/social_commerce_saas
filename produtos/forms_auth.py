@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from .models import Loja
+from .models import Loja, Account, AccountUser, Plan, Subscription, can_add_loja
 import re
 
 SLUGS_RESERVADOS = {'admin', 'api', 'dashboard', 'accounts', 'static', 'media', 'pj', 'saas-master-admin', 'login', 'logout'}
@@ -68,8 +68,29 @@ class MerchantSignUpForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
+            # Criar Account
+            account = Account.objects.create(nome=self.cleaned_data['nome_loja'])
+            AccountUser.objects.create(account=account, user=user, role='owner', status='active')
+            
+            # Criar Plan basic e Subscription
+            plan, _ = Plan.objects.get_or_create(
+                nome='basic',
+                defaults={
+                    'max_lojas': 1,
+                    'max_produtos_por_loja': 10,
+                    'max_usuarios': 1,
+                    'preco_mensal': 0
+                }
+            )
+            Subscription.objects.create(account=account, plan=plan, status='active')
+            
+            can, msg = can_add_loja(account)
+            if not can:
+                raise forms.ValidationError(msg)
+                
             # Criar a loja automaticamente com os dados validados
             Loja.objects.create(
+                account=account,
                 owner=user,
                 nome=self.cleaned_data['nome_loja'],
                 slug=self.cleaned_data['slug_loja'],

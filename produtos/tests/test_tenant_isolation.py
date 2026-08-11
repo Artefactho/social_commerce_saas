@@ -82,3 +82,40 @@ def test_auth_me_sem_erro_status():
     assert loja_info['nome'] == loja.nome
     assert loja_info['plano'] == "basic"
     assert 'status' not in loja_info
+
+
+@pytest.mark.django_db
+def test_plano_basic_bloqueia_segunda_loja():
+    """
+    Garante que um usuário com plano Basic (max_lojas=1) não consiga criar uma segunda loja.
+    """
+    from produtos.models import can_add_loja
+    user = UserFactory()
+    loja1 = LojaFactory(owner=user, nome="Loja 1", slug="loja-1", plano="basic")
+    account = loja1.account
+
+    can, msg = can_add_loja(account)
+    assert can is False
+    assert "Limite de 1 loja(s) atingido" in msg
+
+
+@pytest.mark.django_db
+def test_plano_pro_permite_multiplas_lojas_mesma_assinatura():
+    """
+    Garante que um usuário com plano Pro (max_lojas=3) consegue ter Loja de Perfumes e
+    Loja de Lingerie sob a MESMA assinatura (mesmo account_id).
+    """
+    from produtos.models import can_add_loja
+    user = UserFactory()
+    loja_perfumes = LojaFactory(owner=user, nome="Loja de Perfumes", slug="perfumes", plano="pro")
+    account = loja_perfumes.account
+
+    can, msg = can_add_loja(account)
+    assert can is True
+
+    loja_lingerie = LojaFactory(account=account, owner=user, nome="Loja de Lingerie", slug="lingerie")
+
+    assert account.lojas.count() == 2
+    assert loja_perfumes.account_id == loja_lingerie.account_id
+    assert loja_perfumes.plano == "pro"
+    assert loja_lingerie.plano == "pro"

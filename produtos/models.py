@@ -3,6 +3,71 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+class Plan(models.Model):
+    nome = models.CharField(max_length=20, unique=True)  # basic, pro, master
+    max_lojas = models.IntegerField(default=1)
+    max_produtos_por_loja = models.IntegerField(default=10)
+    max_usuarios = models.IntegerField(default=1)
+    preco_mensal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return self.nome
+
+class Account(models.Model):
+    nome = models.CharField(max_length=150)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def can_add_loja(self):
+        return can_add_loja(self)
+
+    def __str__(self):
+        return self.nome
+
+class Subscription(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Ativa'),
+        ('past_due', 'Inadimplente'),
+        ('canceled', 'Cancelada'),
+    ]
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='subscription')
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    vencimento = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.account.nome} - {self.plan.nome} ({self.status})"
+
+class AccountUser(models.Model):
+    ROLE_CHOICES = [
+        ('owner', 'Proprietário'),
+        ('manager', 'Gerente'),
+        ('staff', 'Atendente'),
+    ]
+    STATUS_CHOICES = [
+        ('active', 'Ativo'),
+        ('invited', 'Convidado'),
+        ('removed', 'Removido'),
+    ]
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='owner')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+
+    class Meta:
+        unique_together = ('account', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} @ {self.account.nome} ({self.role})"
+
+def can_add_loja(account):
+    if not account or not hasattr(account, 'subscription') or not account.subscription or not account.subscription.plan:
+        return False, "Conta sem assinatura válida."
+    limite = account.subscription.plan.max_lojas
+    count = account.lojas.count()
+    if count >= limite:
+        return False, f"Limite de {limite} loja(s) atingido para o plano {account.subscription.plan.nome}."
+    return True, ""
+
 class Template(models.Model):
     nome = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, help_text="Deve corresponder ao nome do arquivo em templates/vitrines/")
@@ -33,6 +98,7 @@ class Loja(models.Model):
         ('LINK', 'Link de Pagamento Simples')
     ]
 
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='lojas')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="lojas", null=True, blank=True)
     nome = models.CharField(max_length=150, verbose_name="Nome da Loja")
     slug = models.SlugField(unique=True, help_text="Como vai ficar no link ex: /minha-loja")
@@ -56,23 +122,22 @@ class Loja(models.Model):
     webhook_token = models.CharField(max_length=100, blank=True, null=True, help_text="Auth Token de segurança do Webhook")
     n8n_webhook_url = models.URLField(blank=True, null=True, help_text="URL do n8n para onde o SaaS enviará os eventos")
 
-    # NOVOS CAMPOS SAAS
-    plano = models.CharField(
-        max_length=20, 
-        choices=[('basic', 'Basic'), ('pro', 'Pro'), ('master', 'Master')], 
-        default='basic'
-    )
     template = models.ForeignKey(Template, on_delete=models.SET_NULL, null=True, blank=True)
 
     criado_em = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def plano(self):
+        if hasattr(self, 'account') and self.account and hasattr(self.account, 'subscription') and self.account.subscription and self.account.subscription.plan:
+            return self.account.subscription.plan.nome
+        return 'basic'
+
     def can_add_product(self):
         """Validação centralizada de limite de produtos por plano"""
+        limite = self.account.subscription.plan.max_produtos_por_loja
         count = self.produtos.count()
-        if self.plano == 'basic' and count >= 10:
-            return False, "Limite de 10 produtos atingido para o plano Basic."
-        if self.plano == 'pro' and count >= 50:
-            return False, "Limite de 50 produtos atingido para o plano Pro."
+        if count >= limite:
+            return False, f"Limite de {limite} produtos atingido para o plano {self.plano}."
         return True, ""
 
     def save(self, *args, **kwargs):
