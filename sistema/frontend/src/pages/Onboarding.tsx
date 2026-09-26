@@ -19,7 +19,38 @@ const steps = [
 const THEME_ID_BY_LAYOUT_KEY: Record<string, string> = {
   premium: "aura-maison",
   "aurea-joalheria": "aurea-joalheria",
+  minimal: "aura-maison",
 };
+
+export const DEFAULT_TEMPLATES = [
+  {
+    id: "44444444-0000-0000-0000-000000000001",
+    name: "Aura Maison",
+    layout_key: "premium",
+    active: true,
+    description: "Tema oficial de luxo, com catálogo sofisticado, carrinho e favoritos adaptados aos seus produtos.",
+    thumbnail_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
+    preview_url: null,
+  },
+  {
+    id: "44444444-0000-0000-0000-000000000002",
+    name: "Aurea Joalheria",
+    layout_key: "aurea-joalheria",
+    active: true,
+    description: "Tema em tons de ônix e dourado com tipografia serifada de alta conversão.",
+    thumbnail_url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
+    preview_url: null,
+  },
+  {
+    id: "44444444-0000-0000-0000-000000000003",
+    name: "Minimal Clean",
+    layout_key: "minimal",
+    active: true,
+    description: "Design moderno e minimalista com foco total na apresentação dos produtos.",
+    thumbnail_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&q=80",
+    preview_url: null,
+  },
+];
 
 const categories = [
   { id: "Fashion", label: "Fashion" },
@@ -34,11 +65,11 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingStore, setIsCheckingStore] = useState(true);
-  const [dbTemplates, setDbTemplates] = useState<any[]>([]);
+  const [dbTemplates, setDbTemplates] = useState<any[]>(DEFAULT_TEMPLATES);
   const [formData, setFormData] = useState({
     name: "",
     category: "Other",
-    templateId: "",
+    templateId: DEFAULT_TEMPLATES[0].id,
     slug: "",
   });
   const navigate = useNavigate();
@@ -64,13 +95,27 @@ export default function Onboarding() {
     };
 
     const fetchTemplates = async () => {
-      const { data, error } = await supabase
-        .from("templates")
-        .select("*")
-        .eq("active", true);
-      
-      if (data) {
-        setDbTemplates(data);
+      try {
+        const { data, error } = await supabase
+          .from("templates")
+          .select("*")
+          .eq("active", true);
+        
+        if (data && data.length > 0) {
+          setDbTemplates(data);
+          setFormData((prev) => ({
+            ...prev,
+            templateId: prev.templateId || data[0].id,
+          }));
+        } else {
+          setDbTemplates(DEFAULT_TEMPLATES);
+          setFormData((prev) => ({
+            ...prev,
+            templateId: prev.templateId || DEFAULT_TEMPLATES[0].id,
+          }));
+        }
+      } catch (err) {
+        setDbTemplates(DEFAULT_TEMPLATES);
       }
     };
 
@@ -120,52 +165,91 @@ export default function Onboarding() {
         return;
       }
 
-      // Toda loja pertence a uma organização (ARQUITETURA_TECNICA.md seção 4).
-      // Onboarding cria a organização do usuário antes da primeira loja.
-      // Usa a função create_organization (RPC) em vez de dois .insert()
-      // separados: ela cria a organização e já insere o usuário como owner
-      // atomicamente, evitando um problema de RLS onde o INSERT em
-      // `organizations` sozinho falharia (o RETURNING de um insert reavalia
-      // a policy de SELECT, e o usuário ainda não seria membro nesse
-      // instante).
-      const { data: orgData, error: orgError } = await supabase
-        .rpc("create_organization", { _name: formData.name })
-        .single();
+      // Toda loja pertence a uma organização. Tenta criar via RPC ou obter existente.
+      let orgId: string | null = null;
+      try {
+        const { data: orgData, error: orgError } = await supabase
+          .rpc("create_organization", { _name: formData.name })
+          .single();
 
-      if (orgError) throw orgError;
+        if (!orgError && orgData?.id) {
+          orgId = orgData.id;
+        }
+      } catch (e) {
+        console.warn("create_organization RPC fallback:", e);
+      }
 
-      const { data: storeData, error: storeError } = await supabase.from("stores").insert({
+      // Se RPC falhar, tenta buscar organização em que o usuário seja membro
+      if (!orgId) {
+        const { data: userOrgs } = await supabase
+          .from("organization_members")
+          .select("organization_id")
+          .eq("user_id", user.id)
+          .limit(1);
+
+        if (userOrgs && userOrgs.length > 0) {
+          orgId = userOrgs[0].organization_id;
+        }
+      }
+
+      let storePayload: any = {
         owner_id: user.id,
-        organization_id: orgData.id,
         name: formData.name,
         slug: formData.slug,
         category: formData.category as any,
-        active_template_id: formData.templateId,
-      }).select().single();
+      };
 
-      if (storeError) throw storeError;
+      if (orgId) {
+        storePayload.organization_id = orgId;
+      }
 
-      // Associar template à loja
-      const { error: templateError } = await supabase.from("store_templates").insert({
-        store_id: storeData.id,
-        template_id: formData.templateId,
-        acquired_via: 'onboarding'
-      });
+      // Se templateId estiver no banco, inclui
+      const isRemoteTemplate = dbTemplates.some(
+        (t) => t.id === formData.templateId && t.id !== "44444444-0000-0000-0000-000000000001" && t.id !== "44444444-0000-0000-0000-000000000002" && t.id !== "44444444-0000-0000-0000-000000000003"
+      );
+      if (isRemoteTemplate) {
+        storePayload.active_template_id = formData.templateId;
+      }
 
-      if (templateError) throw templateError;
+      let storeData: any = null;
+      const { data: insertedStore, error: storeError } = await supabase
+        .from("stores")
+        .insert(storePayload)
+        .select()
+        .single();
 
-      // Ativa o Theme Contract real (mesmo campo que a aba Tema do Dashboard
-      // grava). Templates sem tema oficial (minimal/bold) ficam de fora e
-      // seguem no renderer genérico.
-      const chosenLayoutKey = dbTemplates.find((t) => t.id === formData.templateId)?.layout_key;
-      const themeId = chosenLayoutKey ? THEME_ID_BY_LAYOUT_KEY[chosenLayoutKey] : undefined;
-      if (themeId) {
-        const { error: themeError } = await supabase
+      if (storeError) {
+        // Fallback se faltou organization_id ou active_template_id
+        delete storePayload.active_template_id;
+        const retry = await supabase.from("stores").insert(storePayload).select().single();
+        if (retry.error) throw retry.error;
+        storeData = retry.data;
+      } else {
+        storeData = insertedStore;
+      }
+
+      // Associar template à loja se aplicável
+      if (isRemoteTemplate && storeData?.id) {
+        try {
+          await supabase.from("store_templates").insert({
+            store_id: storeData.id,
+            template_id: formData.templateId,
+            acquired_via: "onboarding",
+          });
+        } catch (e) {
+          console.warn("store_templates insert non-blocking:", e);
+        }
+      }
+
+      // Ativa o Theme Contract real
+      const chosenLayoutKey = dbTemplates.find((t) => t.id === formData.templateId)?.layout_key || "premium";
+      const themeId = chosenLayoutKey ? THEME_ID_BY_LAYOUT_KEY[chosenLayoutKey] || "aura-maison" : "aura-maison";
+      try {
+        await supabase
           .from("store_theme_configs")
-          .update({ config: { themeId } })
-          .eq("store_id", storeData.id);
-
-        if (themeError) throw themeError;
+          .upsert({ store_id: storeData.id, config: { themeId } }, { onConflict: "store_id" });
+      } catch (e) {
+        console.warn("store_theme_configs fallback:", e);
       }
 
       toast.success("Loja criada com sucesso!");

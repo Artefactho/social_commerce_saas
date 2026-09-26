@@ -41,13 +41,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ProductModal } from "@/components/ProductModal";
+import { DEFAULT_TEMPLATES } from "./Onboarding";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [store, setStore] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [dbTemplates, setDbTemplates] = useState<any[]>([]);
+  const [dbTemplates, setDbTemplates] = useState<any[]>(DEFAULT_TEMPLATES);
   const [plans, setPlans] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   const [isUpdatingTemplate, setIsUpdatingTemplate] = useState(false);
@@ -367,11 +368,19 @@ const Dashboard = () => {
     };
 
     const fetchTemplates = async () => {
-      const { data, error } = await supabase
-        .from("templates")
-        .select("*")
-        .eq("active", true);
-      if (data) setDbTemplates(data);
+      try {
+        const { data, error } = await supabase
+          .from("templates")
+          .select("*")
+          .eq("active", true);
+        if (data && data.length > 0) {
+          setDbTemplates(data);
+        } else {
+          setDbTemplates(DEFAULT_TEMPLATES);
+        }
+      } catch {
+        setDbTemplates(DEFAULT_TEMPLATES);
+      }
     };
 
     const fetchPlans = async () => {
