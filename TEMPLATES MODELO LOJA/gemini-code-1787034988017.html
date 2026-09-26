@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurea Joalheria — Alta Joalheria & Peças Exclusivas</title>
+  
+  <!-- Fontes de Luxo: Cinzel e Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       VARIÁVEIS DE DESIGN SYSTEM (TEMA JOALHERIA ESCURO / CLARO)
+       ========================================================================== */
+    :root {
+      /* Tema Escuro: Ônix Profundo, Ouro Nobre e Tipografia Branca */
+      --bg-body: #050506;
+      --bg-surface: #0e0e12;
+      --bg-card: #14141a;
+      --bg-overlay: rgba(5, 5, 6, 0.85);
+
+      --gold-primary: #e5b869;
+      --gold-light: #faebb7;
+      --gold-dark: #9e7529;
+      --gold-gradient: linear-gradient(135deg, #faebb7 0%, #e5b869 50%, #9e7529 100%);
+      --gold-border: rgba(229, 184, 105, 0.28);
+      --gold-glow: rgba(229, 184, 105, 0.18);
+
+      --text-white: #ffffff;
+      --text-body: #dedee6;
+      --text-muted: #8c8c9a;
+      --border-subtle: rgba(229, 184, 105, 0.16);
+      --shadow-elevation: 0 25px 60px rgba(0, 0, 0, 0.85);
+    }
+
+    [data-theme="light"] {
+      /* Tema Claro: Mármore Pérola & Ouro Nobre */
+      --bg-body: #f8f7f5;
+      --bg-surface: #eeeae3;
+      --bg-card: #ffffff;
+      --bg-overlay: rgba(238, 234, 227, 0.9);
+
+      --gold-primary: #b88628;
+      --gold-light: #d6a445;
+      --gold-dark: #7a520a;
+      --gold-gradient: linear-gradient(135deg, #d6a445 0%, #b88628 50%, #6e4703 100%);
+      --gold-border: rgba(184, 134, 40, 0.32);
+      --gold-glow: rgba(184, 134, 40, 0.12);
+
+      --text-white: #111114;
+      --text-body: #3c3c43;
+      --text-muted: #737380;
+      --border-subtle: rgba(184, 134, 40, 0.2);
+      --shadow-elevation: 0 20px 40px rgba(80, 60, 20, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-body);
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .store-container {
+      width: 100%;
+      max-width: 1160px;
+      background: var(--bg-surface);
+      border: 1px solid var(--gold-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow-elevation), 0 0 45px var(--gold-glow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Faixa de Informações do Topo */
+    .top-announcement {
+      background: rgba(0, 0, 0, 0.35);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 11px 20px;
+      text-align: center;
+      font-size: 0.68rem;
+      letter-spacing: 3.5px;
+      font-weight: 600;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+    }
+
+    /* ==========================================================================
+       CABEÇALHO: FLUXO DE 3 COLUNAS
+       ========================================================================== */
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 44px 40px 34px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 25px;
+    }
+
+    /* Centro: Logo e Nome com Espaçamento Rigoroso */
+    .header-center {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo-circle {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--bg-card), var(--bg-body));
+      border: 2px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px var(--gold-glow);
+      position: relative;
+    }
+
+    .brand-logo-circle span {
+      font-family: 'Cinzel', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .brand-subtitle {
+      font-size: 0.65rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold-primary);
+      margin-top: -10px;
+      font-weight: 500;
+    }
+
+    .header-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 15px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.76rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--gold-primary);
+    }
+
+    /* Botões Circulares de Ação */
+    .btn-icon {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--gold-glow);
+    }
+
+    .btn-icon svg {
+      width: 19px;
+      height: 19px;
+      stroke: var(--gold-primary);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--gold-primary);
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-toggle-btn {
+      display: none;
+    }
+
+    /* ==========================================================================
+       BANNER HERO
+       ========================================================================== */
+    .hero-banner {
+      margin: 28px 35px;
+      padding: 50px 20px;
+      text-align: center;
+      background: radial-gradient(ellipse at center, var(--bg-card) 0%, var(--bg-body) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+    }
+
+    .hero-banner h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    .hero-banner h1 span {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-banner p {
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold-primary);
+    }
+
+    /* ==========================================================================
+       GRADE DE PRODUTOS
+       ========================================================================== */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      padding: 0 35px 50px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--gold-primary);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px var(--gold-glow);
+    }
+
+    .tag-seal {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+
+    .product-visual {
+      height: 240px;
+      background: radial-gradient(circle, #1a1a22 0%, #08080a 100%);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .gem-pendant {
+      width: 60px;
+      height: 90px;
+      background: linear-gradient(135deg, #ffffff 0%, #d4e7f5 40%, #5d8aa8 100%);
+      clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+      box-shadow: 0 0 35px rgba(212, 231, 245, 0.5);
+    }
+
+    .gem-ring {
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      border: 10px solid var(--gold-primary);
+      box-shadow: 0 0 30px var(--gold-glow);
+      position: relative;
+    }
+
+    .gem-ring::before {
+      content: '';
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 20px;
+      height: 20px;
+      background: #00e5a3;
+      box-shadow: 0 0 20px #00e5a3;
+    }
+
+    .gem-earrings {
+      width: 40px;
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gem-earrings .drop {
+      width: 22px;
+      height: 38px;
+      background: var(--gold-gradient);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    .gem-earrings .chain {
+      width: 2px;
+      height: 40px;
+      background: var(--gold-primary);
+    }
+
+    .product-info h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 4px;
+    }
+
+    .product-info .specs {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 18px;
+    }
+
+    .price-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gold-primary);
+    }
+
+    .btn-reserve {
+      background: transparent;
+      color: var(--text-white);
+      border: 1px solid var(--gold-primary);
+      padding: 10px 20px;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-reserve:hover {
+      background: var(--gold-gradient);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    /* ==========================================================================
+       GAVETAS INTERATIVAS
+       ========================================================================== */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 340px;
+      max-width: 85vw;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      z-index: 1001;
+      padding: 32px 26px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-elevation);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-left {
+      left: 0;
+      transform: translateX(-100%);
+    }
+
+    .drawer-right {
+      right: 0;
+      transform: translateX(100%);
+    }
+
+    .drawer.active {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+      margin-bottom: 22px;
+    }
+
+    .drawer-header h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      color: var(--gold-primary);
+      letter-spacing: 2px;
+    }
+
+    .drawer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .checkout-btn {
+      background: var(--gold-gradient);
+      color: #000;
+      border: none;
+      padding: 15px;
+      width: 100%;
+      border-radius: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .mobile-menu-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .mobile-menu-links a {
+      color: var(--text-white);
+      text-decoration: none;
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-subtle);
+      padding: 26px 35px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--gold-primary);
+    }
+
+    @media (max-width: 860px) {
+      .desktop-nav {
+        display: none;
+      }
+
+      .menu-toggle-btn {
+        display: flex;
+      }
+
+      .site-header {
+        padding: 24px 20px;
+      }
+
+      .header-center {
+        margin-top: 6px;
+        gap: 10px;
+      }
+
+      .brand-logo-circle {
+        width: 76px;
+        height: 76px;
+      }
+
+      .brand-logo-circle span {
+        font-size: 2.3rem;
+      }
+
+      .brand-title {
+        font-size: 1rem;
+        letter-spacing: 4px;
+      }
+
+      .hero-banner, .products-grid {
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <!-- Menu Mobile -->
+  <aside class="drawer drawer-left" id="mobileDrawer">
+    <div class="drawer-header">
+      <h2>Coleções</h2>
+      <button class="drawer-close" id="closeMenuBtn">&times;</button>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="#">Alta Joalheria</a></li>
+      <li><a href="#">Alianças & Solitários</a></li>
+      <li><a href="#">Alta Relojoaria</a></li>
+      <li><a href="#">Atelier Sob Medida</a></li>
+      <li><a href="#">Concierge</a></li>
+    </ul>
+  </aside>
+
+  <!-- Sacola de Joias -->
+  <aside class="drawer drawer-right" id="cartDrawer">
+    <div class="drawer-header">
+      <h2>Cofre de Compras</h2>
+      <button class="drawer-close" id="closeCartBtn">&times;</button>
+    </div>
+    <div class="cart-items">
+      <div class="cart-item">
+        <div>
+          <p style="font-size: 0.88rem; font-weight: 600; color: var(--text-white);">Solitário Aurora</p>
+          <span style="font-size: 0.8rem; color: var(--gold-primary);">R$ 8.900,00</span>
+        </div>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">1x</span>
+      </div>
+      <div class="cart-item">
+        <div>
+          <p style="font-size: 0.88rem; font-weight: 600; color: var(--text-white);">Anel Real Esmeralda</p>
+          <span style="font-size: 0.8rem; color: var(--gold-primary);">R$ 14.500,00</span>
+        </div>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">1x</span>
+      </div>
+    </div>
+    <button class="checkout-btn">Finalizar Aquisição</button>
+  </aside>
+
+  <!-- Container Geral -->
+  <div class="store-container">
+    
+    <div class="top-announcement">
+      Envio Segurado & Certificado Gemológico Internacional em Todas as Peças
+    </div>
+
+    <!-- Cabeçalho 3 Colunas -->
+    <header class="site-header">
+      
+      <div class="header-left">
+        <button class="btn-icon menu-toggle-btn" id="menuToggle" aria-label="Abrir Menu">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <nav class="desktop-nav">
+          <ul class="nav-links">
+            <li><a href="#" class="active">Alta Joalheria</a></li>
+            <li><a href="#">Alianças</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-center">
+        <div class="brand-logo-circle">
+          <span>A</span>
+        </div>
+        <div class="brand-title">Aurea</div>
+        <div class="brand-subtitle">Haute Joaillerie</div>
+      </div>
+
+      <div class="header-right">
+        <nav class="desktop-nav">
+          <ul class="nav-links">
+            <li><a href="#">Sob Medida</a></li>
+          </ul>
+        </nav>
+
+        <button class="btn-icon" id="themeToggle" title="Alternar Modo Claro/Escuro" aria-label="Alternar Tema">
+          <svg id="themeIcon" viewBox="0 0 24 24"></svg>
+        </button>
+
+        <button class="btn-icon" id="cartToggle" title="Ver Sacola" aria-label="Abrir Sacola">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span class="badge-count">2</span>
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Banner -->
+    <section class="hero-banner">
+      <h1>Lapidação Rara & <span>Ouro 18k</span></h1>
+      <p>A eternidade esculpida em joias de prestígio</p>
+    </section>
+
+    <!-- Produtos -->
+    <main class="products-grid">
+      
+      <article class="product-card">
+        <span class="tag-seal">Diamante Certificado</span>
+        <div class="product-visual">
+          <div class="gem-pendant"></div>
+        </div>
+        <div class="product-info">
+          <h3>Solitário Aurora</h3>
+          <p class="specs">Ouro Nobre 18k, Diamante Lapidação Brilhante 1.5ct</p>
+        </div>
+        <div class="card-footer">
+          <div class="price-wrap">
+            <span class="price-label">Valor</span>
+            <span class="price">R$ 8.900,00</span>
+          </div>
+          <button class="btn-reserve">Adquirir</button>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <span class="tag-seal">Edição Limitada</span>
+        <div class="product-visual">
+          <div class="gem-ring"></div>
+        </div>
+        <div class="product-info">
+          <h3>Anel Real Esmeralda</h3>
+          <p class="specs">Ouro Amarelo 18k com Esmeralda Colombiana Central</p>
+        </div>
+        <div class="card-footer">
+          <div class="price-wrap">
+            <span class="price-label">Valor</span>
+            <span class="price">R$ 14.500,00</span>
+          </div>
+          <button class="btn-reserve">Adquirir</button>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <span class="tag-seal">Design Exclusivo</span>
+        <div class="product-visual">
+          <div class="gem-earrings">
+            <div class="chain"></div>
+            <div class="drop"></div>
+          </div>
+        </div>
+        <div class="product-info">
+          <h3>Brincos Gota Imperial</h3>
+          <p class="specs">Ouro Acetinado 18k, Pavê de Diamantes Naturais</p>
+        </div>
+        <div class="card-footer">
+          <div class="price-wrap">
+            <span class="price-label">Valor</span>
+            <span class="price">R$ 6.200,00</span>
+          </div>
+          <button class="btn-reserve">Adquirir</button>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+      <span>© 2026 AUREA HAUTE JOAILLERIE — TODOS OS DIREITOS RESERVADOS</span>
+      <div style="display: flex; gap: 20px;">
+        <a href="#">Autenticidade</a>
+        <a href="#">Garantia Eterna</a>
+        <a href="#">Concierge</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+
+    const sunSvg = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+    const moonSvg = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+
+    function renderIcon(theme) {
+      themeIcon.innerHTML = theme === 'dark' ? sunSvg : moonSvg;
+    }
+
+    renderIcon(htmlElement.getAttribute('data-theme'));
+
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = htmlElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlElement.setAttribute('data-theme', nextTheme);
+      renderIcon(nextTheme);
+    });
+
+    const overlay = document.getElementById('drawerOverlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+    const cartToggle = document.getElementById('cartToggle');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+
+    function closeDrawers() {
+      overlay.classList.remove('active');
+      mobileDrawer.classList.remove('active');
+      cartDrawer.classList.remove('active');
+    }
+
+    menuToggle.addEventListener('click', () => {
+      mobileDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    cartToggle.addEventListener('click', () => {
+      cartDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    closeMenuBtn.addEventListener('click', closeDrawers);
+    closeCartBtn.addEventListener('click', closeDrawers);
+    overlay.addEventListener('click', closeDrawers);
+  </script>
+</body>
+</html>

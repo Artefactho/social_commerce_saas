@@ -1,29 +1,29 @@
-# Ambientes Virtuais
-venv/
-env/
-.venv/
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
 
-# Python / Django
-__pycache__/
-*.py[cod]
-*$py.class
-*.sqlite3
-db.sqlite3
-
-# Arquivos de Ambiente (Segredos e Senhas)
-.env
+# Environment variables
 .env.local
+.env.*.local
 
-# pytest / Logs
-.pytest_cache/
-pytest_report.txt
-error_log.txt
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Arquivos de Mídia (Imagens do usuário)
-/media/
-
-# IDE / Editores
+# Editor / OS
+.DS_Store
+Thumbs.db
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# Temporary / Cache
+.eslintcache
+.temp
+.branches

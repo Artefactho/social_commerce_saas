@@ -1,0 +1,12 @@
+project_id = "saas-social-commerce"
+
+# site_url/additional_redirect_urls controlam pra onde o GoTrue (Supabase
+# Auth) tem permissão de redirecionar depois de processar um link de e-mail
+# (recuperação de senha, confirmação de cadastro, etc.) — sem isso configurado
+# corretamente, ele cai no default do CLI (http://127.0.0.1:3000), que não é
+# a porta do dev server deste projeto (Vite roda em :8080). Isso é config
+# só do ambiente local; o projeto Supabase real precisa da mesma configuração
+# (Auth → URL Configuration no painel) quando o domínio de produção existir.
+[auth]
+site_url = "http://localhost:8080"
+additional_redirect_urls = ["http://localhost:8080/**", "http://127.0.0.1:8080/**"]

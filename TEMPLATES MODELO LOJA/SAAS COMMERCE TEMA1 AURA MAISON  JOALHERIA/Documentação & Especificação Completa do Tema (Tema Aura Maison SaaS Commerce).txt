@@ -1,0 +1,117 @@
+🏛️ Documentação & Especificação Completa do Tema (Aura Maison SaaS)
+Esta especificação abrange toda a estrutura visual, arquitetura de componentes, fluxo de dados e guia de integração para plataformas SaaS.
+1. Identidade Visual & Design System
+🎨 Paleta de Cores
+Fundo da Aplicação (Canvas): #FAF8F5 (Off-White nobre com toque quente, reduzindo fadiga visual e transmitindo elegância)
+Superfície dos Cards e Containers: #FFFFFF e #FAF7F2 (com contornos sutis em #EAE2D3)
+Dourado / Acentos de Ouro: #D4AF37 / #B8860B (Anéis da logo, monogramas, estrelas de avaliação e selos de garantia)
+Texto Primário: #1C1917 (Stone-900 para títulos, preços e textos de alto contraste)
+Texto Secundário / Detalhes: #78716C (Stone-500 para categorias, SKUs e notas técnicas)
+Alerta & Promoções: #E11D48 / #FFE4E6 (Badges de "20% OFF" e indicador de favoritos)
+Sucesso & WhatsApp: #16A34A / #22C55E (Botão de compra direta via WhatsApp e confirmação PIX)
+🔤 Tipografia & Escala
+Headings & Monogramas: Tipografia clássica serifada de alta distinção (Playfair Display / Cinzel / Georgia).
+Corpo, Menus e Dados Técnicos: Sans-serif geométrica limpa (Plus Jakarta Sans / Inter), garantindo legibilidade em dispositivos móveis e desktops.
+Escalas:
+Títulos Principais: text-3xl a text-5xl com espaçamento e entrelinha amplos (tracking-wide, leading-tight).
+Nomes de Produto: text-sm a text-base em peso semibold (font-semibold).
+Badges, SKUs e Legendas: text-xs a text-[11px], em caixa alta com tracking-widest.
+🔘 Curvaturas (Border Radius) & Profundidade
+Cards de Produto e Banners: rounded-3xl (24px), proporcionando uma estética orgânica e contemporânea.
+Pílulas de Filtro e Botões: rounded-full para botões principais e rounded-xl (12px) para seletores secundários.
+Sombras: Sombras difusas (shadow-sm, shadow-md e shadow-2xl) com baixa opacidade para evitar aspecto pesado.
+2. Arquitetura de Componentes
+🏷️ 1. TopBanner (TopBanner.tsx)
+Barra de Anúncios Rotativa: Alterna mensagens institucionais (Frete grátis a partir de R$ 500, Cupom PRIMEIRACOMPRA, Parcelamento em até 10x sem juros).
+Seletor de Moeda & Atalho VIP: Indicador de moeda (BRL - R$) e link direto para suporte.
+👑 2. Header & Sistema de 3 Menus (Header.tsx)
+Logo Centralizada Redonda:
+Emblema circular de 56px (rounded-full) com anéis concêntricos dourados e monograma tipográfico AM.
+Nome da marca e subtítulo institucional em tipografia serifada.
+Menu 1: Coleções & Catálogo (Dropdown):
+Joias em Ouro 18k, Bolsas em Couro Legítimo, Perfumaria de Nicho, Vestuário em Seda Pura e Acessórios.
+Menu 2: Destaques & Tendências:
+Curadoria de Mais Vendidos, Lançamentos e Edições Limitadas.
+Menu 3: Experiência & Atendimento:
+História da Maison (Modal), Certificados de Autenticidade e Concierge VIP no WhatsApp.
+Ações Rápidas:
+Campo de busca com filtro em tempo real.
+Contador numérico dinâmico para Lista de Desejos (Wishlist).
+Contador numérico dinâmico para Sacola de Compras.
+Menu responsivo gaveta para telas menores.
+🖼️ 3. Hero Catalog Banner (HeroCatalogBanner.tsx)
+Layout editorial dividido com curvaturas suaves.
+Grade de 4 micro-categorias rápidas com miniaturas circulares.
+Botão com rolagem suave (smooth scroll) para o catálogo.
+🛡️ 4. Barra de Confiança & Garantias (FeaturesBar.tsx)
+4 pilares de segurança do consumidor: Materiais Nobres Autênticos, Frete Segurado, Pagamento em 10x sem Juros / 5% no PIX e Concierge Personalizado.
+🛍️ 5. Vitrine & Cards de Produtos (CatalogSection.tsx & ProductCard.tsx)
+Filtros e Ordenação:
+Filtro por pílulas de categorias com contagem de itens.
+Filtro rápido "Apenas com Desconto".
+Ordenação por Relevância, Menor Preço, Maior Preço, Avaliações e Ordem Alfabética.
+Recursos do Card:
+Troca dinâmica de foto no efeito hover (segundo ângulo da peça).
+Badges de "Exclusivo", "Edição Limitada" e cálculo percentual de desconto.
+Seletores inline de variantes (cores e tamanhos).
+Botão de compra direta com feedback de adição.
+Botão de favoritar (coração) com persistência de estado.
+🔍 6. Modal de Detalhes do Produto (ProductModal.tsx)
+Galeria de fotos em alta definição com navegação por miniaturas.
+Seletores de variantes com amostras circulares de cor e botões de tamanho.
+Simulador de frete e prazos por CEP.
+Abas informativas com especificações técnicas, certificado de garantia e cuidados com a peça.
+🛒 7. Sacola Lateral (Slide-Over Drawer) (CartDrawer.tsx)
+Barra de Progresso de Frete Grátis: Calcula em tempo real o valor restante para atingir o frete cortesia.
+Edição de quantidades (+/-) e exclusão rápida de itens.
+Aplicador de cupons de desconto (PRIMEIRACOMPRA, AURA10, VIP20).
+Opção 1: Fechar pelo WhatsApp: Gera mensagem pronta com a lista de itens, variantes, valores e cupom.
+Opção 2: Ir para o Checkout: Abre o modal de pagamento seguro.
+❤️ 8. Lista de Desejos (Wishlist Drawer) (WishlistDrawer.tsx)
+Armazena os itens favoritos no localStorage.
+Botão "Mover para a Sacola" para conversão direta de compra.
+💳 9. Checkout Transparente (CheckoutModal.tsx)
+Passo 1 (Identificação): Nome, E-mail, WhatsApp e CPF.
+Passo 2 (Entrega): CEP, Endereço completo, Bairro, Cidade e UF.
+Passo 3 (Pagamento):
+Opção PIX: Desconto automático de 5%, geração de QR Code visual e chave Copia-e-Cola com temporizador de 15 minutos.
+Opção Cartão de Crédito: Validação de campos e seletor de 1x a 10x sem juros.
+Comprovante Final: Confirmação de pedido com ID único (#AM-XXXXX) e link para receber atualizações pelo WhatsApp.
+🔔 10. Toasts e Feedback Visual (Toast.tsx)
+Alertas flutuantes no canto inferior com thumbnail do produto, confirmação de ação e botão direto "Ver Sacola".
+3. Modelo de Dados TypeScript (types.ts)
+code
+TypeScript
+export interface Product {
+  id: string;
+  name: string;
+  category: 'joias' | 'bolsas' | 'perfumaria' | 'vestuario' | 'decoracao' | string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  details: string[];
+  images: string[];
+  colors?: { name: string; hex: string }[];
+  sizes?: string[];
+  isFeatured?: boolean;
+  isNew?: boolean;
+  isLimited?: boolean;
+  rating: number;
+  reviewsCount: number;
+  sku: string;
+  stock: number;
+  material?: string;
+}
+
+export interface CartItem {
+  id: string; // ID composto: `${product.id}-${color}-${size}`
+  product: Product;
+  quantity: number;
+  selectedColor?: string;
+  selectedSize?: string;
+}
+4. Guia de Customização para o seu SaaS Multi-Tenant
+Para tornar o tema 100% dinâmico por lojista cadastrado na sua plataforma:
+Configurações da Loja (TenantConfig): Permita que cada lojista personalize pelo painel do seu SaaS o nome da marca, monograma central, número de WhatsApp para atendimento, valor mínimo de frete grátis e cupons de desconto ativos.
+Checkout Flexível: Os lojistas podem escolher entre Vendas Consultivas via WhatsApp (fechamento humano) ou Checkout Transparente conectado a gateways como Mercado Pago, Asaas, Pagar.me ou Stripe.
+Persistência de Dados: O tema utiliza localStorage (aura_cart_items e aura_wishlist_items), permitindo que a sacola do cliente permaneça salva mesmo se ele fechar o navegador.

@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vespera Studio — Coleção White & Navy</title>
+  
+  <!-- Tipografia Moderna & Editorial -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM (Multitenant White & Navy com Paleta Dinâmica)
+       ========================================================================== */
+    :root {
+      /* Base Padrão Branco Minimalista */
+      --bg-body: #f4f6f9;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-overlay: rgba(10, 25, 47, 0.6);
+
+      /* Cor de Destaque Primária (Azul Escuro / Navy configurável) */
+      --primary-color: #0a192f;
+      --primary-hover: #172a45;
+      --primary-light: #e8eef5;
+      --primary-border: rgba(10, 25, 47, 0.16);
+      --primary-border-strong: #0a192f;
+      --primary-glow: rgba(10, 25, 47, 0.08);
+
+      /* Tipografia & Neutros */
+      --text-title: #0a192f;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      
+      --shadow-sm: 0 4px 12px rgba(10, 25, 47, 0.04);
+      --shadow-md: 0 12px 30px rgba(10, 25, 47, 0.08);
+      --shadow-lg: 0 20px 45px rgba(10, 25, 47, 0.12);
+    }
+
+    /* Variação Modo Escuro Dinâmico */
+    [data-theme="dark"] {
+      --bg-body: #050b14;
+      --bg-surface: #0a1322;
+      --bg-card: #0f1c30;
+      --bg-card-hover: #15253f;
+      --bg-overlay: rgba(2, 6, 12, 0.8);
+
+      --primary-color: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --primary-light: rgba(56, 189, 248, 0.12);
+      --primary-border: rgba(56, 189, 248, 0.25);
+      --primary-border-strong: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+
+      --text-title: #f8fafc;
+      --text-body: #cbd5e1;
+      --text-muted: #8092a7;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 40px;
+    }
+
+    /* ==========================================================================
+       BANNER DE TOPO HERO (PROMO / COMUNICADO)
+       ========================================================================== */
+    .top-hero-banner {
+      width: 100%;
+      background: var(--primary-color);
+      color: #ffffff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 2px solid var(--primary-border-strong);
+    }
+
+    .top-hero-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .top-hero-tag {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+
+    .top-hero-btn {
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 700;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    /* Container Principal */
+    .store-container {
+      width: 100%;
+      max-width: 1180px;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      margin-top: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       CABEÇALHO EM 3 COLUNAS
+       ========================================================================== */
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 34px 45px 28px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+    }
+
+    /* Centro: Logo e Nome com Respiro Superior */
+    .header-center {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-decoration: none;
+      margin-top: 6px;
+    }
+
+    .brand-logo-circle {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 22px var(--primary-glow);
+    }
+
+    .brand-logo-circle span {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .header-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--primary-color);
+    }
+
+    /* Botões Circulares */
+    .btn-icon {
+      background: var(--bg-surface);
+      border: 1px solid var(--primary-border);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--primary-color);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .btn-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--primary-color);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--primary-color);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-toggle-btn {
+      display: none;
+    }
+
+    /* ==========================================================================
+       HERO INTERNO / APRESENTAÇÃO
+       ========================================================================== */
+    .hero-section {
+      margin: 28px 40px;
+      padding: 45px 30px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-surface) 100%);
+      border: 1px solid var(--primary-border);
+      border-radius: 16px;
+    }
+
+    .hero-section h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 8px;
+    }
+
+    .hero-section p {
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       VITRINE DE PRODUTOS
+       ========================================================================== */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      padding: 0 40px 50px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-md);
+    }
+
+    .product-visual {
+      height: 230px;
+      background: var(--primary-light);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .shape-card-1 {
+      width: 100px;
+      height: 140px;
+      background: var(--primary-color);
+      border-radius: 10px;
+      box-shadow: 0 10px 20px var(--primary-glow);
+    }
+
+    .shape-card-2 {
+      width: 115px;
+      height: 115px;
+      border-radius: 50%;
+      border: 6px solid var(--primary-color);
+      background: #ffffff;
+      box-shadow: 0 10px 25px var(--primary-glow);
+    }
+
+    .shape-card-3 {
+      width: 110px;
+      height: 135px;
+      background: #ffffff;
+      border: 2px solid var(--primary-color);
+      border-radius: 8px;
+      box-shadow: 0 10px 20px var(--primary-glow);
+    }
+
+    .product-info h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 6px;
+    }
+
+    .product-info .details {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 18px;
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .btn-buy {
+      background: var(--primary-color);
+      color: #ffffff;
+      border: 1px solid var(--primary-color);
+      padding: 10px 22px;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-buy:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      box-shadow: 0 6px 16px var(--primary-glow);
+    }
+
+    /* ==========================================================================
+       PAINEL DE PERSONALIZAÇÃO DE CORES (THEME CUSTOMIZER)
+       ========================================================================== */
+    .color-panel-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 330px;
+      max-width: 85vw;
+      background: var(--bg-surface);
+      border-left: 2px solid var(--primary-border);
+      z-index: 1002;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .color-panel-drawer.active {
+      transform: translateX(0);
+    }
+
+    .panel-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-title);
+      margin: 18px 0 10px;
+    }
+
+    .color-presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .color-swatch-btn {
+      width: 100%;
+      height: 44px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .color-swatch-btn:hover, .color-swatch-btn.active {
+      transform: scale(1.08);
+      border-color: var(--text-title);
+    }
+
+    .custom-picker-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-light);
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--primary-border);
+    }
+
+    .custom-picker-wrap input[type="color"] {
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      background: none;
+    }
+
+    /* Gavetas Padrão (Menu Mobile & Carrinho) */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 330px;
+      max-width: 85vw;
+      background: var(--bg-surface);
+      border: 1px solid var(--primary-border);
+      z-index: 1001;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-left {
+      left: 0;
+      transform: translateX(-100%);
+    }
+
+    .drawer-right {
+      right: 0;
+      transform: translateX(100%);
+    }
+
+    .drawer.active {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .drawer-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--primary-color);
+    }
+
+    .drawer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .checkout-btn {
+      background: var(--primary-color);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .mobile-menu-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mobile-menu-links a {
+      color: var(--text-title);
+      text-decoration: none;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Rodapé */
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-subtle);
+      padding: 24px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--primary-color);
+    }
+
+    /* Responsividade */
+    @media (max-width: 860px) {
+      .desktop-nav {
+        display: none;
+      }
+
+      .menu-toggle-btn {
+        display: flex;
+      }
+
+      .site-header {
+        padding: 22px 20px;
+      }
+
+      .brand-logo-circle {
+        width: 72px;
+        height: 72px;
+      }
+
+      .brand-logo-circle span {
+        font-size: 2.2rem;
+      }
+
+      .hero-section, .products-grid {
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       BANNER DE TOPO
+       ========================================================================== -->
+  <div class="top-hero-banner">
+    <div class="top-hero-content">
+      <span class="top-hero-tag">Novo</span>
+      <span>Lançamento Coleção White & Navy • Frete Cortesia para todo o Brasil</span>
+      <span class="top-hero-btn" id="openShopBanner">Ver Produtos</span>
+    </div>
+  </div>
+
+  <!-- Overlay para as Gavetas -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <!-- Painel de Customização de Cores -->
+  <aside class="color-panel-drawer" id="colorPanelDrawer">
+    <div class="drawer-header">
+      <h2>Cores do Tema</h2>
+      <button class="drawer-close" id="closeColorPanelBtn">&times;</button>
+    </div>
+    
+    <p style="font-size: 0.78rem; color: var(--text-muted);">Alterne a cor de destaque da loja em tempo real:</p>
+
+    <div class="panel-section-title">Paletas Pré-definidas</div>
+    <div class="color-presets-grid">
+      <button class="color-swatch-btn active" style="background: #0a192f;" data-color="#0a192f" title="Azul Marinho"></button>
+      <button class="color-swatch-btn" style="background: #1e3a8a;" data-color="#1e3a8a" title="Azul Safira"></button>
+      <button class="color-swatch-btn" style="background: #0f766e;" data-color="#0f766e" title="Azul Petróleo"></button>
+      <button class="color-swatch-btn" style="background: #312e81;" data-color="#312e81" title="Azul Índigo"></button>
+    </div>
+
+    <div class="panel-section-title">Cor Personalizada</div>
+    <div class="custom-picker-wrap">
+      <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-title);">Escolher Tom:</span>
+      <input type="color" id="customColorPicker" value="#0a192f">
+    </div>
+  </aside>
+
+  <!-- Gaveta do Menu Mobile -->
+  <aside class="drawer drawer-left" id="mobileDrawer">
+    <div class="drawer-header">
+      <h2>Navegação</h2>
+      <button class="drawer-close" id="closeMenuBtn">&times;</button>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="#">Coleção White & Navy</a></li>
+      <li><a href="#">Catálogo</a></li>
+      <li><a href="#">Personalização</a></li>
+      <li><a href="#">Atendimento</a></li>
+    </ul>
+  </aside>
+
+  <!-- Gaveta da Sacola -->
+  <aside class="drawer drawer-right" id="cartDrawer">
+    <div class="drawer-header">
+      <h2>Sua Sacola</h2>
+      <button class="drawer-close" id="closeCartBtn">&times;</button>
+    </div>
+    <div class="cart-items">
+      <div class="cart-item">
+        <div>
+          <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-title);">Vaso Esculpido Navy</p>
+          <span style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;">R$ 680,00</span>
+        </div>
+        <span>1x</span>
+      </div>
+      <div class="cart-item">
+        <div>
+          <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-title);">Espelho Orbital Pure</p>
+          <span style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;">R$ 1.290,00</span>
+        </div>
+        <span>1x</span>
+      </div>
+    </div>
+    <button class="checkout-btn">Finalizar Pedido</button>
+  </aside>
+
+  <!-- Estrutura Principal -->
+  <div class="store-container">
+    
+    <!-- Cabeçalho -->
+    <header class="site-header">
+      
+      <!-- Esquerda -->
+      <div class="header-left">
+        <button class="btn-icon menu-toggle-btn" id="menuToggle" aria-label="Abrir Menu">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <nav class="desktop-nav">
+          <ul class="nav-links">
+            <li><a href="#" class="active">Coleção</a></li>
+            <li><a href="#">Sobre</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Centro: Logo e Nome com Respiro Superior -->
+      <div class="header-center">
+        <div class="brand-logo-circle">
+          <span>V</span>
+        </div>
+        <div class="brand-title">Vespera Studio</div>
+      </div>
+
+      <!-- Direita: Paleta + Modo Claro/Escuro + Sacola -->
+      <div class="header-right">
+        <nav class="desktop-nav">
+          <ul class="nav-links">
+            <li><a href="#">Contato</a></li>
+          </ul>
+        </nav>
+
+        <!-- Botão Painel de Cores -->
+        <button class="btn-icon" id="colorPanelToggle" title="Alterar Cor de Destaque">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10c0 2.5-1.5 4-3.5 4H17a2 2 0 0 0-2 2v1.5c0 1.5-1 2.5-2.5 2.5A10 10 0 0 1 12 2z"></path></svg>
+        </button>
+
+        <!-- Botão Modo Claro / Escuro -->
+        <button class="btn-icon" id="themeToggle" title="Alternar Modo Claro/Escuro">
+          <svg id="themeIcon" viewBox="0 0 24 24"></svg>
+        </button>
+
+        <!-- Botão Sacola -->
+        <button class="btn-icon" id="cartToggle" title="Abrir Sacola">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span class="badge-count">2</span>
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Apresentação Hero -->
+    <section class="hero-section">
+      <h1>Estética Pura & Linhas Navy</h1>
+      <p>Design minimalista com precisão contemporânea</p>
+    </section>
+
+    <!-- Produtos -->
+    <main class="products-grid">
+      
+      <article class="product-card">
+        <div class="product-visual">
+          <div class="shape-card-1"></div>
+        </div>
+        <div class="product-info">
+          <h3>Vaso Esculpido Navy</h3>
+          <p class="details">Porcelana Acetinada, Acabamento Fosco</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 680,00</span>
+          <button class="btn-buy">Comprar</button>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-visual">
+          <div class="shape-card-2"></div>
+        </div>
+        <div class="product-info">
+          <h3>Espelho Orbital Pure</h3>
+          <p class="details">Moldura em Aço Naval com Borda Fina</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 1.290,00</span>
+          <button class="btn-buy">Comprar</button>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-visual">
+          <div class="shape-card-3"></div>
+        </div>
+        <div class="product-info">
+          <h3>Pasta Documentos</h3>
+          <p class="details">Couro Genuíno com Costura Navy</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 2.150,00</span>
+          <button class="btn-buy">Comprar</button>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+      <span>© 2026 VESPERA STUDIO — SISTEMA MULTITENANT</span>
+      <div style="display: flex; gap: 20px;">
+        <a href="#">Privacidade</a>
+        <a href="#">Termos</a>
+        <a href="#">Suporte</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Gerenciador de Cores do Tema (Dynamic Theme Swatches)
+    const colorPanelToggle = document.getElementById('colorPanelToggle');
+    const colorPanelDrawer = document.getElementById('colorPanelDrawer');
+    const closeColorPanelBtn = document.getElementById('closeColorPanelBtn');
+    const colorSwatches = document.querySelectorAll('.color-swatch-btn');
+    const customColorPicker = document.getElementById('customColorPicker');
+    const root = document.documentElement;
+
+    function applyAccentColor(hex) {
+      root.style.setProperty('--primary-color', hex);
+      root.style.setProperty('--primary-border-strong', hex);
+      root.style.setProperty('--primary-border', `${hex}26`);
+      root.style.setProperty('--primary-light', `${hex}12`);
+      root.style.setProperty('--primary-glow', `${hex}18`);
+    }
+
+    colorSwatches.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorSwatches.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const selectedColor = btn.getAttribute('data-color');
+        customColorPicker.value = selectedColor;
+        applyAccentColor(selectedColor);
+      });
+    });
+
+    customColorPicker.addEventListener('input', (e) => {
+      colorSwatches.forEach(b => b.classList.remove('active'));
+      applyAccentColor(e.target.value);
+    });
+
+    // Alternador de Tema Claro / Escuro
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const sunSvg = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+    const moonSvg = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+
+    function updateThemeIcon(theme) {
+      themeIcon.innerHTML = theme === 'dark' ? sunSvg : moonSvg;
+    }
+
+    updateThemeIcon(root.getAttribute('data-theme'));
+
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nextTheme);
+      updateThemeIcon(nextTheme);
+    });
+
+    // Gavetas (Drawers)
+    const overlay = document.getElementById('drawerOverlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+    const cartToggle = document.getElementById('cartToggle');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+
+    function closeAllDrawers() {
+      overlay.classList.remove('active');
+      mobileDrawer.classList.remove('active');
+      cartDrawer.classList.remove('active');
+      colorPanelDrawer.classList.remove('active');
+    }
+
+    colorPanelToggle.addEventListener('click', () => {
+      colorPanelDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    menuToggle.addEventListener('click', () => {
+      mobileDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    cartToggle.addEventListener('click', () => {
+      cartDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    closeColorPanelBtn.addEventListener('click', closeAllDrawers);
+    closeMenuBtn.addEventListener('click', closeAllDrawers);
+    closeCartBtn.addEventListener('click', closeAllDrawers);
+    overlay.addEventListener('click', closeAllDrawers);
+  </script>
+</body>
+</html>

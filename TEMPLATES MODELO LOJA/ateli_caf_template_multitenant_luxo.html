@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ateliê Café — Coleção Luxo Multitenant</title>
+  
+  <!-- Fontes Premium: Cormorant Garamond (Serif) e Plus Jakarta Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Ícones FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* =========================================================
+       VARIÁVEIS DE TEMA (MODO ESCURO / MODO CLARO)
+       ========================================================= */
+    :root[data-theme="dark"] {
+      --bg-body: #120c08;
+      --bg-surface: #1a120c;
+      --bg-card: #241a12;
+      --bg-card-hover: #2e2118;
+      
+      --accent-primary: #d49b6a; /* Cobre / Âmbar */
+      --accent-secondary: #e8c4a2;
+      --accent-gradient: linear-gradient(135deg, #f0d0b0 0%, #d49b6a 50%, #8c5832 100%);
+      --accent-glow: rgba(212, 155, 106, 0.15);
+      --border-color: rgba(212, 155, 106, 0.22);
+      
+      --text-main: #f7f1eb;
+      --text-muted: #a69385;
+      --text-inverse: #120c08;
+      
+      --shadow-color: rgba(0, 0, 0, 0.7);
+    }
+
+    :root[data-theme="light"] {
+      --bg-body: #f5efe8;
+      --bg-surface: #ffffff;
+      --bg-card: #faf6f0;
+      --bg-card-hover: #f2e8dc;
+      
+      --accent-primary: #8c542b; /* Café Torrado Premium */
+      --accent-secondary: #b87d4b;
+      --accent-gradient: linear-gradient(135deg, #b87d4b 0%, #8c542b 50%, #522d14 100%);
+      --accent-glow: rgba(140, 84, 43, 0.12);
+      --border-color: rgba(140, 84, 43, 0.2);
+      
+      --text-main: #241810;
+      --text-muted: #736154;
+      --text-inverse: #ffffff;
+      
+      --shadow-color: rgba(60, 40, 25, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px;
+    }
+
+    /* Banner Informativo Multitenant */
+    .tenant-badge-bar {
+      width: 100%;
+      max-width: 1180px;
+      background: var(--bg-card);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 8px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .tenant-badge-bar strong {
+      color: var(--accent-primary);
+    }
+
+    /* Container Principal da Loja */
+    .store-container {
+      width: 100%;
+      max-width: 1180px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px var(--shadow-color), 0 0 30px var(--accent-glow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Barra de Notificação Superior */
+    .top-announcement {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 15px;
+      text-align: center;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+    }
+
+    /* Cabeçalho */
+    header {
+      padding: 24px 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Barra Superior de Ações (Tema, Menu Mobile, Carrinho) */
+    .header-actions {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: absolute;
+      top: 24px;
+      padding: 0 32px;
+      z-index: 10;
+    }
+
+    .action-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      position: relative;
+    }
+
+    .action-btn:hover {
+      background: var(--accent-glow);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      font-size: 0.68rem;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* LOGO CENTRAL MAIOR */
+    .brand-logo-container {
+      margin-top: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: 90px; /* Maior conforme solicitado */
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, var(--bg-card-hover), var(--bg-body));
+      border: 2px solid var(--accent-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 25px var(--accent-glow);
+      cursor: pointer;
+    }
+
+    .brand-logo span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 8px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Navegação Desktop */
+    nav.desktop-nav {
+      margin-top: 10px;
+    }
+
+    nav.desktop-nav ul {
+      display: flex;
+      list-style: none;
+      gap: 40px;
+    }
+
+    nav.desktop-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding-bottom: 4px;
+    }
+
+    nav.desktop-nav a:hover, nav.desktop-nav a.active {
+      color: var(--accent-primary);
+      border-bottom: 2px solid var(--accent-primary);
+    }
+
+    /* Mobile Menu Drawer */
+    .mobile-nav-drawer {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 280px;
+      height: 100vh;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+      z-index: 100;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      transition: left 0.4s ease;
+    }
+
+    .mobile-nav-drawer.open {
+      left: 0;
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 15px;
+    }
+
+    .drawer-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      color: var(--accent-primary);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .mobile-nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mobile-nav-links a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .mobile-nav-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    /* Backdrop para Menus Laterais */
+    .overlay-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .overlay-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Cart Drawer Side Panel */
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -360px;
+      width: 340px;
+      height: 100vh;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      z-index: 100;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.4s ease;
+    }
+
+    .cart-drawer.open {
+      right: 0;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 12px;
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .cart-item-img {
+      width: 50px;
+      height: 50px;
+      background: var(--bg-card-hover);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+    }
+
+    .cart-item-info h4 {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .cart-item-info p {
+      font-size: 0.78rem;
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .cart-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 15px;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .btn-checkout {
+      width: 100%;
+      background: var(--accent-gradient);
+      color: var(--text-inverse);
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      margin: 10px 32px 32px;
+      padding: 48px 24px;
+      text-align: center;
+      background: radial-gradient(ellipse at center, var(--bg-card-hover) 0%, var(--bg-card) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .hero-banner h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      font-style: italic;
+      font-weight: 500;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .hero-banner p {
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Grid de Produtos */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      padding: 0 32px 48px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .product-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px var(--shadow-color), 0 0 20px var(--accent-glow);
+    }
+
+    .product-visual {
+      height: 220px;
+      background: radial-gradient(circle, var(--bg-card-hover) 0%, var(--bg-body) 100%);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    /* Mockups dos Produtos */
+    .item-icon {
+      font-size: 4rem;
+      color: var(--accent-primary);
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.4));
+    }
+
+    .product-info h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .product-info .materials {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+    }
+
+    .price {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+
+    .btn-buy {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--accent-primary);
+      padding: 10px 18px;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-buy:hover {
+      background: var(--accent-gradient);
+      color: var(--text-inverse);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* Rodapé */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 24px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    footer .links {
+      display: flex;
+      gap: 20px;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--accent-primary);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .desktop-nav {
+        display: none;
+      }
+      
+      .hero-banner h1 {
+        font-size: 2rem;
+      }
+      
+      .products-grid {
+        padding: 0 16px 32px;
+      }
+      
+      .hero-banner {
+        margin: 10px 16px 24px;
+      }
+
+      .header-actions {
+        padding: 0 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra do Sistema Multitenant -->
+  <div class="tenant-badge-bar">
+    <span><i class="fa-solid fa-layer-group"></i> Sistema Multitenant: <strong>Ateliê Café (Tenant #042)</strong></span>
+    <span>Sessão Exclusiva</span>
+  </div>
+
+  <!-- Container Principal -->
+  <div class="store-container">
+    
+    <!-- Aviso Topo -->
+    <div class="top-announcement">
+      Frete Cortesia para Todo o Brasil em Pedidos Acima de R$ 500
+    </div>
+
+    <!-- Cabeçalho -->
+    <header>
+      
+      <!-- Ações do Topo -->
+      <div class="header-actions">
+        <!-- Botão Hambúrguer Mobile -->
+        <button class="action-btn" id="openMobileNav" title="Abrir Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Botão Alternar Tema Claro / Escuro -->
+        <button class="action-btn" id="themeToggle" title="Alternar Tema">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- Botão Carrinho -->
+        <button class="action-btn" id="openCart" title="Ver Carrinho">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="cart-badge" id="cartCount">2</span>
+        </button>
+      </div>
+
+      <!-- LOGO CENTRAL MAIOR -->
+      <div class="brand-logo-container">
+        <div class="brand-logo">
+          <span>V</span>
+        </div>
+        <div class="brand-name">Vespera Ateliê</div>
+      </div>
+
+      <!-- Menu Desktop -->
+      <nav class="desktop-nav">
+        <ul>
+          <li><a href="#" class="active">Coleção Café</a></li>
+          <li><a href="#">O Ateliê</a></li>
+          <li><a href="#">Exclusivos</a></li>
+          <li><a href="#">Edição Limitada</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Banner Principal -->
+    <section class="hero-banner">
+      <h1>Seleção Café & Âmbar</h1>
+      <p>Design contemporâneo refinado para ambientes exigentes</p>
+    </section>
+
+    <!-- Grid de Produtos -->
+    <main class="products-grid">
+      
+      <!-- Produto 1 -->
+      <article class="product-card">
+        <div class="product-visual">
+          <i class="fa-solid fa-whiskey-glass item-icon"></i>
+        </div>
+        <div class="product-info">
+          <h3>Vaso Esculpido Café</h3>
+          <p class="materials">Cerâmica Fosca, Tom Tabaco e Argila</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 480,00</span>
+          <button class="btn-buy" onclick="addToCart()">Adicionar</button>
+        </div>
+      </article>
+
+      <!-- Produto 2 -->
+      <article class="product-card">
+        <div class="product-visual">
+          <i class="fa-solid fa-circle-notch item-icon"></i>
+        </div>
+        <div class="product-info">
+          <h3>Espelho Orbital Cobre</h3>
+          <p class="materials">Latão Escovado, Acabamento Âmbar</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 890,00</span>
+          <button class="btn-buy" onclick="addToCart()">Adicionar</button>
+        </div>
+      </article>
+
+      <!-- Produto 3 -->
+      <article class="product-card">
+        <div class="product-visual">
+          <i class="fa-solid fa-book-bookmark item-icon"></i>
+        </div>
+        <div class="product-info">
+          <h3>Portfólio Couro Espresso</h3>
+          <p class="materials">Couro Italiano Legítimo, Cor Café</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 1.250,00</span>
+          <button class="btn-buy" onclick="addToCart()">Adicionar</button>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+      <span>© 2026 VESPERA ATELIER — TODOS OS DIREITOS RESERVADOS</span>
+      <div class="links">
+        <a href="#">Privacidade</a>
+        <a href="#">Termos de Uso</a>
+        <a href="#">Suporte Ateliê</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Backdrop para Fechar Menus -->
+  <div class="overlay-backdrop" id="backdrop"></div>
+
+  <!-- Menu Mobile Lateral -->
+  <aside class="mobile-nav-drawer" id="mobileDrawer">
+    <div class="drawer-header">
+      <h3>Menu Ateliê</h3>
+      <button class="close-btn" id="closeMobileNav">&times;</button>
+    </div>
+    <ul class="mobile-nav-links">
+      <li><a href="#">Coleção Café</a></li>
+      <li><a href="#">O Ateliê</a></li>
+      <li><a href="#">Exclusivos</a></li>
+      <li><a href="#">Edição Limitada</a></li>
+      <li><a href="#">Contato Privado</a></li>
+    </ul>
+  </aside>
+
+  <!-- Gaveta do Carrinho -->
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <h3>Seu Carrinho</h3>
+      <button class="close-btn" id="closeCart">&times;</button>
+    </div>
+
+    <div class="cart-items">
+      <div class="cart-item">
+        <div class="cart-item-img"><i class="fa-solid fa-whiskey-glass"></i></div>
+        <div class="cart-item-info">
+          <h4>Vaso Esculpido Café</h4>
+          <p>R$ 480,00</p>
+        </div>
+      </div>
+      <div class="cart-item">
+        <div class="cart-item-img"><i class="fa-solid fa-circle-notch"></i></div>
+        <div class="cart-item-info">
+          <h4>Espelho Orbital Cobre</h4>
+          <p>R$ 890,00</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span style="color: var(--accent-primary);">R$ 1.370,00</span>
+      </div>
+      <button class="btn-checkout">Finalizar Pedido</button>
+    </div>
+  </aside>
+
+  <!-- Lógica JavaScript (Tema, Mobile Nav e Carrinho) -->
+  <script>
+    // Alternador de Tema Claro / Escuro
+    const root = document.documentElement;
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = root.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      root.setAttribute('data-theme', newTheme);
+      
+      if (newTheme === 'light') {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      }
+    });
+
+    // Controle do Menu Mobile e Carrinho
+    const backdrop = document.getElementById('backdrop');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const cartDrawer = document.getElementById('cartDrawer');
+
+    const openMobileBtn = document.getElementById('openMobileNav');
+    const closeMobileBtn = document.getElementById('closeMobileNav');
+    const openCartBtn = document.getElementById('openCart');
+    const closeCartBtn = document.getElementById('closeCart');
+
+    function closeAllDrawers() {
+      mobileDrawer.classList.remove('open');
+      cartDrawer.classList.remove('open');
+      backdrop.classList.remove('active');
+    }
+
+    openMobileBtn.addEventListener('click', () => {
+      closeAllDrawers();
+      mobileDrawer.classList.add('open');
+      backdrop.classList.add('active');
+    });
+
+    openCartBtn.addEventListener('click', () => {
+      closeAllDrawers();
+      cartDrawer.classList.add('open');
+      backdrop.classList.add('active');
+    });
+
+    closeMobileBtn.addEventListener('click', closeAllDrawers);
+    closeCartBtn.addEventListener('click', closeAllDrawers);
+    backdrop.addEventListener('click', closeAllDrawers);
+
+    // Adicionar item ao Carrinho (Simulação)
+    let count = 2;
+    function addToCart() {
+      count++;
+      document.getElementById('cartCount').innerText = count;
+      openCartBtn.click();
+    }
+  </script>
+</body>
+</html>

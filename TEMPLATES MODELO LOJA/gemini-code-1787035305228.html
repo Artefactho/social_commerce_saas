@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vespera Studio — Coleção Pérola & Tons Pastel</title>
+  
+  <!-- Fontes de Luxo Editorial: Cormorant Infant (Serifada Clássica) e Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM (Multitenant Pérola & Tons Pastel)
+       ========================================================================== */
+    :root {
+      /* Base Pérola Acetinada (Tema Claro) */
+      --bg-body: #fbf9f6;
+      --bg-surface: #f4eee7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #faf6f1;
+      --bg-overlay: rgba(80, 70, 65, 0.45);
+
+      /* Tom Pérola Champagne Suave */
+      --primary-color: #b89b82;
+      --primary-hover: #a3846b;
+      --primary-light: #f5ede4;
+      --primary-border: rgba(184, 155, 130, 0.3);
+      --primary-border-strong: #b89b82;
+      --primary-glow: rgba(184, 155, 130, 0.18);
+      --pearl-gradient: linear-gradient(135deg, #ffffff 0%, #fbf4ec 45%, #ecdcc9 100%);
+      --pearl-shimmer: linear-gradient(135deg, #f7efe6 0%, #e6d3c0 50%, #c4ab94 100%);
+
+      /* Tipografia Neutra Quente */
+      --text-title: #3d352e;
+      --text-body: #5c5249;
+      --text-muted: #8c7f74;
+      --border-subtle: #ebdcd0;
+
+      --shadow-sm: 0 4px 15px rgba(140, 115, 95, 0.05);
+      --shadow-md: 0 12px 30px rgba(140, 115, 95, 0.08);
+      --shadow-lg: 0 20px 45px rgba(140, 115, 95, 0.12);
+    }
+
+    /* Variação Modo Escuro Suave (Pérola Negra & Veludo Taupe) */
+    [data-theme="dark"] {
+      --bg-body: #161311;
+      --bg-surface: #201c19;
+      --bg-card: #292420;
+      --bg-card-hover: #332d28;
+      --bg-overlay: rgba(10, 8, 7, 0.8);
+
+      --primary-color: #d9beaa;
+      --primary-hover: #e8d2c2;
+      --primary-light: rgba(217, 190, 170, 0.12);
+      --primary-border: rgba(217, 190, 170, 0.25);
+      --primary-border-strong: #d9beaa;
+      --primary-glow: rgba(217, 190, 170, 0.15);
+      --pearl-gradient: linear-gradient(135deg, #332d28 0%, #201c19 100%);
+      --pearl-shimmer: linear-gradient(135deg, #f2e2d5 0%, #d9beaa 50%, #9e7f69 100%);
+
+      --text-title: #faf6f2;
+      --text-body: #d6cbbf;
+      --text-muted: #9e9185;
+      --border-subtle: rgba(217, 190, 170, 0.15);
+      --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 40px;
+    }
+
+    /* ==========================================================================
+       BANNER DE TOPO EM TOM PASTEL
+       ========================================================================== */
+    .top-hero-banner {
+      width: 100%;
+      background: var(--primary-light);
+      color: var(--text-title);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid var(--primary-border);
+    }
+
+    .top-hero-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .top-hero-tag {
+      background: #ffffff;
+      border: 1px solid var(--primary-border);
+      color: var(--primary-color);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.7rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .top-hero-btn {
+      color: var(--primary-color);
+      text-decoration: underline;
+      font-weight: 700;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    /* Container Principal */
+    .store-container {
+      width: 100%;
+      max-width: 1180px;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      margin-top: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       CABEÇALHO EM 3 COLUNAS
+       ========================================================================== */
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 38px 45px 30px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+    }
+
+    /* Centro: Logo e Nome com Respiro Superior */
+    .header-center {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+
+    .brand-logo-circle {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: var(--pearl-gradient);
+      border: 2px solid var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px var(--primary-glow);
+    }
+
+    .brand-logo-circle span {
+      font-family: 'Cormorant Infant', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: var(--pearl-shimmer);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-family: 'Cormorant Infant', serif;
+      font-size: 1.35rem;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .header-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--primary-color);
+    }
+
+    /* Botões Circulares */
+    .btn-icon {
+      background: var(--bg-card);
+      border: 1px solid var(--primary-border);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--primary-color);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .btn-icon svg {
+      width: 19px;
+      height: 19px;
+      stroke: var(--primary-color);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--primary-color);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-toggle-btn {
+      display: none;
+    }
+
+    /* ==========================================================================
+       HERO APRESENTAÇÃO
+       ========================================================================== */
+    .hero-section {
+      margin: 28px 40px;
+      padding: 48px 30px;
+      text-align: center;
+      background: var(--pearl-gradient);
+      border: 1px solid var(--primary-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hero-section h1 {
+      font-family: 'Cormorant Infant', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 8px;
+    }
+
+    .hero-section p {
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       VITRINE DE PRODUTOS
+       ========================================================================== */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      padding: 0 40px 50px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-md);
+    }
+
+    .product-visual {
+      height: 230px;
+      background: var(--primary-light);
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .shape-card-1 {
+      width: 95px;
+      height: 135px;
+      background: linear-gradient(135deg, #ffffff 0%, #e6d3c0 100%);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(184, 155, 130, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .shape-card-2 {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #ecdcc9 60%, #c4ab94 100%);
+      box-shadow: 0 10px 25px rgba(184, 155, 130, 0.3);
+      border: 2px solid #ffffff;
+    }
+
+    .shape-card-3 {
+      width: 105px;
+      height: 130px;
+      background: linear-gradient(135deg, #f7efe6 0%, #d8c2b0 100%);
+      border: 1.5px solid var(--primary-color);
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(184, 155, 130, 0.2);
+    }
+
+    .product-info h3 {
+      font-family: 'Cormorant Infant', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 6px;
+    }
+
+    .product-info .details {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 18px;
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .btn-buy {
+      background: var(--primary-color);
+      color: #ffffff;
+      border: 1px solid var(--primary-color);
+      padding: 10px 22px;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-buy:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      box-shadow: 0 6px 16px var(--primary-glow);
+    }
+
+    /* ==========================================================================
+       PAINEL DE PERSONALIZAÇÃO DE TONS PASTEL
+       ========================================================================== */
+    .color-panel-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 330px;
+      max-width: 85vw;
+      background: var(--bg-surface);
+      border-left: 2px solid var(--primary-border);
+      z-index: 1002;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .color-panel-drawer.active {
+      transform: translateX(0);
+    }
+
+    .panel-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-title);
+      margin: 18px 0 10px;
+    }
+
+    .color-presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .color-swatch-btn {
+      width: 100%;
+      height: 44px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .color-swatch-btn:hover, .color-swatch-btn.active {
+      transform: scale(1.08);
+      border-color: var(--text-title);
+    }
+
+    .custom-picker-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-light);
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--primary-border);
+    }
+
+    .custom-picker-wrap input[type="color"] {
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      background: none;
+    }
+
+    /* Gavetas Padrão */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 330px;
+      max-width: 85vw;
+      background: var(--bg-surface);
+      border: 1px solid var(--primary-border);
+      z-index: 1001;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-left {
+      left: 0;
+      transform: translateX(-100%);
+    }
+
+    .drawer-right {
+      right: 0;
+      transform: translateX(100%);
+    }
+
+    .drawer.active {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .drawer-header h2 {
+      font-family: 'Cormorant Infant', serif;
+      font-size: 1.6rem;
+      color: var(--primary-color);
+    }
+
+    .drawer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .checkout-btn {
+      background: var(--primary-color);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .mobile-menu-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mobile-menu-links a {
+      color: var(--text-title);
+      text-decoration: none;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-subtle);
+      padding: 24px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--primary-color);
+    }
+
+    @media (max-width: 860px) {
+      .desktop-nav {
+        display: none;
+      }
+
+      .menu-toggle-btn {
+        display: flex;
+      }
+
+      .site-header {
+        padding: 24px 20px;
+      }
+
+      .brand-logo-circle {
+        width: 74px;
+        height: 74px;
+      }
+
+      .brand-logo-circle span {
+        font-size: 2.4rem;
+      }
+
+      .hero-section, .products-grid {
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner de Topo -->
+  <div class="top-hero-banner">
+    <div class="top-hero-content">
+      <span class="top-hero-tag">Edição Suave</span>
+      <span>Coleção Pérola & Tons Pastel • Frete Cortesia para todo o Brasil</span>
+      <span class="top-hero-btn" id="openShopBanner">Ver Produtos</span>
+    </div>
+  </div>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <!-- Painel de Cores Pastel -->
+  <aside class="color-panel-drawer" id="colorPanelDrawer">
+    <div class="drawer-header">
+      <h2>Tons Pastel</h2>
+      <button class="drawer-close" id="closeColorPanelBtn">&times;</button>
+    </div>
+    
+    <p style="font-size: 0.78rem; color: var(--text-muted);">Alterne entre os tons nacarados e pastel:</p>
+
+    <div class="panel-section-title">Paletas Pérola</div>
+    <div class="color-presets-grid">
+      <button class="color-swatch-btn active" style="background: #b89b82;" data-color="#b89b82" title="Pérola Champagne"></button>
+      <button class="color-swatch-btn" style="background: #c89f91;" data-color="#c89f91" title="Pérola Rosé"></button>
+      <button class="color-swatch-btn" style="background: #8fae9f;" data-color="#8fae9f" title="Menta Suave"></button>
+      <button class="color-swatch-btn" style="background: #a69ab3;" data-color="#a69ab3" title="Lavanda Pastel"></button>
+    </div>
+
+    <div class="panel-section-title">Cor Personalizada</div>
+    <div class="custom-picker-wrap">
+      <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-title);">Escolher Tom:</span>
+      <input type="color" id="customColorPicker" value="#b89b82">
+    </div>
+  </aside>
+
+  <!-- Gaveta Mobile -->
+  <aside class="drawer drawer-left" id="mobileDrawer">
+    <div class="drawer-header">
+      <h2>Navegação</h2>
+      <button class="drawer-close" id="closeMenuBtn">&times;</button>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="#">Coleção Pérola</a></li>
+      <li><a href="#">Catálogo Pastel</a></li>
+      <li><a href="#">Sob Medida</a></li>
+      <li><a href="#">Atendimento</a></li>
+    </ul>
+  </aside>
+
+  <!-- Gaveta Sacola -->
+  <aside class="drawer drawer-right" id="cartDrawer">
+    <div class="drawer-header">
+      <h2>Sua Sacola</h2>
+      <button class="drawer-close" id="closeCartBtn">&times;</button>
+    </div>
+    <div class="cart-items">
+      <div class="cart-item">
+        <div>
+          <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-title);">Vaso Nacarado</p>
+          <span style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;">R$ 720,00</span>
+        </div>
+        <span>1x</span>
+      </div>
+      <div class="cart-item">
+        <div>
+          <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-title);">Espelho Pérola Suave</p>
+          <span style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;">R$ 1.380,00</span>
+        </div>
+        <span>1x</span>
+      </div>
+    </div>
+    <button class="checkout-btn">Finalizar Pedido</button>
+  </aside>
+
+  <!-- Container Geral -->
+  <div class="store-container">
+    
+    <header class="site-header">
+      
+      <!-- Esquerda -->
+      <div class="header-left">
+        <button class="btn-icon menu-toggle-btn" id="menuToggle" aria-label="Abrir Menu">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <nav class="desktop-nav">
+          <ul class="nav-links">
+            <li><a href="#" class="active">Coleção</a></li>
+            <li><a href="#">O Ateliê</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Centro: Logo e Nome com Respiro Superior -->
+      <div class="header-center">
+        <div class="brand-logo-circle">
+          <span>V</span>
+        </div>
+        <div class="brand-title">Vespera Studio</div>
+      </div>
+
+      <!-- Direita -->
+      <div class="header-right">
+        <nav class="desktop-nav">
+          <ul class="nav-links">
+            <li><a href="#">Contato</a></li>
+          </ul>
+        </nav>
+
+        <button class="btn-icon" id="colorPanelToggle" title="Alterar Tom Pastel">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10c0 2.5-1.5 4-3.5 4H17a2 2 0 0 0-2 2v1.5c0 1.5-1 2.5-2.5 2.5A10 10 0 0 1 12 2z"></path></svg>
+        </button>
+
+        <button class="btn-icon" id="themeToggle" title="Alternar Modo Claro/Escuro">
+          <svg id="themeIcon" viewBox="0 0 24 24"></svg>
+        </button>
+
+        <button class="btn-icon" id="cartToggle" title="Abrir Sacola">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span class="badge-count">2</span>
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-section">
+      <h1>Estética Nacarada & Tons Suaves</h1>
+      <p>Sutileza orgânica com reflexos perolados</p>
+    </section>
+
+    <!-- Grid de Produtos -->
+    <main class="products-grid">
+      
+      <article class="product-card">
+        <div class="product-visual">
+          <div class="shape-card-1"></div>
+        </div>
+        <div class="product-info">
+          <h3>Vaso Nacarado</h3>
+          <p class="details">Cerâmica Pérola, Brilho Acetinado</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 720,00</span>
+          <button class="btn-buy">Comprar</button>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-visual">
+          <div class="shape-card-2"></div>
+        </div>
+        <div class="product-info">
+          <h3>Espelho Pérola Suave</h3>
+          <p class="details">Moldura Orgânica em Champagne Pastel</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 1.380,00</span>
+          <button class="btn-buy">Comprar</button>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-visual">
+          <div class="shape-card-3"></div>
+        </div>
+        <div class="product-info">
+          <h3>Carteira Nude Rosé</h3>
+          <p class="details">Couro Legítimo Nacarado com Toque Macio</p>
+        </div>
+        <div class="card-footer">
+          <span class="price">R$ 2.300,00</span>
+          <button class="btn-buy">Comprar</button>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+      <span>© 2026 VESPERA STUDIO — COLEÇÃO PÉROLA & PASTEL</span>
+      <div style="display: flex; gap: 20px;">
+        <a href="#">Privacidade</a>
+        <a href="#">Termos</a>
+        <a href="#">Suporte</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    const colorPanelToggle = document.getElementById('colorPanelToggle');
+    const colorPanelDrawer = document.getElementById('colorPanelDrawer');
+    const closeColorPanelBtn = document.getElementById('closeColorPanelBtn');
+    const colorSwatches = document.querySelectorAll('.color-swatch-btn');
+    const customColorPicker = document.getElementById('customColorPicker');
+    const root = document.documentElement;
+
+    function applyAccentColor(hex) {
+      root.style.setProperty('--primary-color', hex);
+      root.style.setProperty('--primary-border-strong', hex);
+      root.style.setProperty('--primary-border', `${hex}33`);
+      root.style.setProperty('--primary-light', `${hex}18`);
+      root.style.setProperty('--primary-glow', `${hex}22`);
+    }
+
+    colorSwatches.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorSwatches.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const selectedColor = btn.getAttribute('data-color');
+        customColorPicker.value = selectedColor;
+        applyAccentColor(selectedColor);
+      });
+    });
+
+    customColorPicker.addEventListener('input', (e) => {
+      colorSwatches.forEach(b => b.classList.remove('active'));
+      applyAccentColor(e.target.value);
+    });
+
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const sunSvg = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+    const moonSvg = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+
+    function updateThemeIcon(theme) {
+      themeIcon.innerHTML = theme === 'dark' ? sunSvg : moonSvg;
+    }
+
+    updateThemeIcon(root.getAttribute('data-theme'));
+
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nextTheme);
+      updateThemeIcon(nextTheme);
+    });
+
+    const overlay = document.getElementById('drawerOverlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+    const cartToggle = document.getElementById('cartToggle');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+
+    function closeAllDrawers() {
+      overlay.classList.remove('active');
+      mobileDrawer.classList.remove('active');
+      cartDrawer.classList.remove('active');
+      colorPanelDrawer.classList.remove('active');
+    }
+
+    colorPanelToggle.addEventListener('click', () => {
+      colorPanelDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    menuToggle.addEventListener('click', () => {
+      mobileDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    cartToggle.addEventListener('click', () => {
+      cartDrawer.classList.add('active');
+      overlay.classList.add('active');
+    });
+
+    closeColorPanelBtn.addEventListener('click', closeAllDrawers);
+    closeMenuBtn.addEventListener('click', closeAllDrawers);
+    closeCartBtn.addEventListener('click', closeAllDrawers);
+    overlay.addEventListener('click', closeAllDrawers);
+  </script>
+</body>
+</html>

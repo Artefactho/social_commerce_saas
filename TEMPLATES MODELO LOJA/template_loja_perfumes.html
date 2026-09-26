@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Élite Perfumaria</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #ffffff;
+            --accent-color: #d4af37; /* Ouro */
+            --card-bg: #141414;
+            --gray-text: #8e8e93;
+            --border-color: #262626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 60px; /* Espaço para a barra inferior */
+        }
+
+        /* Topo da Loja */
+        header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 20px;
+            font-size: 1.2rem;
+        }
+
+        /* Perfil Estilo Instagram Luxo */
+        .profile-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            padding: 3px;
+            background: linear-gradient(45deg, #d4af37, #aa7c11);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+            flex-grow: 1;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-text);
+        }
+
+        .profile-bio {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .profile-bio h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .profile-bio p {
+            color: var(--gray-text);
+        }
+
+        .profile-bio .tags {
+            color: var(--accent-color);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Destaques (Stories) */
+        .highlights-container {
+            display: flex;
+            gap: 15px;
+            padding: 15px 20px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .highlights-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .highlight-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            min-width: 65px;
+        }
+
+        .highlight-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-bg);
+            font-size: 1.2rem;
+        }
+
+        .highlight-label {
+            font-size: 0.75rem;
+            color: var(--text-color);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Vitrine de Produtos (Grid Otimizado) */
+        .shop-filter {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--gray-text);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .filter-tab.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* Proporção 1:1 Quadrada */
+            background-color: #1a1a1a;
+        }
+
+        .product-image-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tag-sacolinha {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 5px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .product-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+
+        .product-brand {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .product-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1.3;
+            height: 2.6em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-price {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-top: auto;
+        }
+
+        .product-installment {
+            font-size: 0.75rem;
+            color: var(--gray-text);
+        }
+
+        .buy-btn {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: #ffffff;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .buy-btn:hover {
+            background-color: var(--accent-color);
+            color: #000000;
+        }
+
+        /* Barra de Navegação Inferior (Mobile Fixa) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(14, 14, 14, 0.98);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            color: var(--gray-text);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        /* Responsividade para Telas Maiores */
+        @media (min-width: 768px) {
+            body {
+                max-width: 480px;
+                margin: 0 auto;
+                border-left: 1px solid var(--border-color);
+                border-right: 1px solid var(--border-color);
+                box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            }
+            header {
+                max-width: 480px;
+            }
+            .bottom-nav {
+                max-width: 480px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Topo -->
+    <header>
+        <div class="brand-name">L'Élite</div>
+        <div class="header-icons">
+            <span>🔍</span>
+            <span>🛒</span>
+        </div>
+    </header>
+
+    <!-- Perfil da Marca -->
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <!-- SVG de frasco de perfume elegante simulando logo -->
+                <svg viewBox="0 0 100 100" style="width:100%; height:100%; fill:none; stroke:#d4af37; stroke-width:3;">
+                    <path d="M35,40 H65 V85 H35 Z M45,25 H55 V40 H45 Z M42,15 H58 V25 H42 Z" />
+                    <circle cx="50" cy="62" r="10" />
+                </svg>
+            </div>
+            <div class="profile-stats">
+                <div>
+                    <div class="stat-number">12k</div>
+                    <div class="stat-label">Clientes</div>
+                </div>
+                <div>
+                    <div class="stat-number">4.9 ★</div>
+                    <div class="stat-label">Avaliações</div>
+                </div>
+                <div>
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Original</div>
+                </div>
+            </div>
+        </div>
+        <div class="profile-bio">
+            <h1>L'Élite Perfumaria Premium</h1>
+            <p>Fragrâncias importadas exclusivas e alta perfumaria conceitual.</p>
+            <p>✨ Fixação premium de até 12 horas.</p>
+            <div class="tags">#AltaPerfumaria #LuxuryScents</div>
+        </div>
+    </div>
+
+    <!-- Destaques (Stories) -->
+    <div class="highlights-container">
+        <div class="highlight-item">
+            <div class="highlight-circle">🏆</div>
+            <div class="highlight-label">Mais Vendidos</div>
+        </div>
+        <div class="highlight-item">
+            <div class="highlight-circle">🔥</div>
+            <div class="highlight-label">Promoções</div>
+        </div>
+        <div class="highlight-item">
+            <div class="highlight-circle">💎</div>
+            <div class="highlight-label">Lançamentos</div>
+        </div>
+        <div class="highlight-item">
+            <div class="highlight-circle">💬</div>
+            <div class="highlight-label">Depoimentos</div>
+        </div>
+        <div class="highlight-item">
+            <div class="highlight-circle">🚚</div>
+            <div class="highlight-label">Frete</div>
+        </div>
+    </div>
+
+    <!-- Abas / Filtro -->
+    <div class="shop-filter">
+        <div class="filter-tab active">MASCULINOS</div>
+        <div class="filter-tab">FEMININOS</div>
+        <div class="filter-tab">NICHOS</div>
+    </div>
+
+    <!-- Vitrine de Produtos -->
+    <div class="products-grid">
+        
+        <!-- Produto 1 -->
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                <span class="tag-sacolinha">🛍️</span>
+                <!-- SVG Placeholder Elegante de Perfume Masculino -->
+                <svg viewBox="0 0 100 100" style="position:absolute; width:100%; height:100%; background:#1a1a1a; fill:none; stroke:#d4af37; stroke-width:2;">
+                    <rect x="30" y="35" width="40" height="50" rx="5" />
+                    <rect x="42" y="20" width="16" height="15" />
+                    <line x1="30" y1="55" x2="70" y2="55" />
+                    <text x="50" y="50" fill="#8e8e93" font-size="6" text-anchor="middle" letter-spacing="1">BLEU DE NUIT</text>
+                </svg>
+            </div>
+            <div class="product-info">
+                <div class="product-brand">Maison Grand</div>
+                <div class="product-title">Bleu de Nuit Eau de Parfum - 100ml</div>
+                <div class="product-price">R$ 589,00</div>
+                <div class="product-installment">3x de R$ 196,33 sem juros</div>
+                <a href="#" class="buy-btn">Comprar</a>
+            </div>
+        </div>
+
+        <!-- Produto 2 -->
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                <span class="tag-sacolinha">🛍️</span>
+                <!-- SVG Placeholder Elegante de Perfume Dourado -->
+                <svg viewBox="0 0 100 100" style="position:absolute; width:100%; height:100%; background:#1a1a1a; fill:none; stroke:#d4af37; stroke-width:2;">
+                    <path d="M35,35 C35,35 30,60 35,80 C40,90 60,90 65,80 C70,60 65,35 65,35 Z" />
+                    <rect x="44" y="22" width="12" height="13" rx="2" />
+                    <text x="50" y="55" fill="#8e8e93" font-size="6" text-anchor="middle" letter-spacing="1">AMBRE GOLD</text>
+                </svg>
+            </div>
+            <div class="product-info">
+                <div class="product-brand">Oud Luxury</div>
+                <div class="product-title">Ambre Gold Intense Extrait - 50ml</div>
+                <div class="product-price">R$ 749,00</div>
+                <div class="product-installment">3x de R$ 249,66 sem juros</div>
+                <a href="#" class="buy-btn">Comprar</a>
+            </div>
+        </div>
+
+        <!-- Produto 3 -->
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                <span class="tag-sacolinha">🛍️</span>
+                <svg viewBox="0 0 100 100" style="position:absolute; width:100%; height:100%; background:#1a1a1a; fill:none; stroke:#d4af37; stroke-width:2;">
+                    <rect x="32" y="30" width="36" height="55" />
+                    <circle cx="50" cy="18" r="8" />
+                    <text x="50" y="50" fill="#8e8e93" font-size="6" text-anchor="middle" letter-spacing="1">NEROLI FRESH</text>
+                </svg>
+            </div>
+            <div class="product-info">
+                <div class="product-brand">Acqua Viva</div>
+                <div class="product-title">Neroli Fresh Cologne Extreme - 120ml</div>
+                <div class="product-price">R$ 420,00</div>
+                <div class="product-installment">3x de R$ 140,00 sem juros</div>
+                <a href="#" class="buy-btn">Comprar</a>
+            </div>
+        </div>
+
+        <!-- Produto 4 -->
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                <span class="tag-sacolinha">🛍️</span>
+                <svg viewBox="0 0 100 100" style="position:absolute; width:100%; height:100%; background:#1a1a1a; fill:none; stroke:#d4af37; stroke-width:2;">
+                    <polygon points="50,25 70,50 60,85 40,85 30,50" />
+                    <rect x="45" y="15" width="10" height="10" />
+                    <text x="50" y="55" fill="#8e8e93" font-size="6" text-anchor="middle" letter-spacing="1">ROUGE NOIR</text>
+                </svg>
+            </div>
+            <div class="product-info">
+                <div class="product-brand">Vamp Parfum</div>
+                <div class="product-title">Rouge Noir Premium Parfum - 90ml</div>
+                <div class="product-price">R$ 610,00</div>
+                <div class="product-installment">3x de R$ 203,33 sem juros</div>
+                <a href="#" class="buy-btn">Comprar</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Barra de Navegação Inferior Móvel -->
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <span>🏠</span>
+        </div>
+        <div class="nav-item">
+            <span>🛍️</span>
+        </div>
+        <div class="nav-item">
+            <span>❤️</span>
+        </div>
+        <div class="nav-item">
+            <span>👤</span>
+        </div>
+    </div>
+
+</body>
+</html>
