@@ -30,7 +30,7 @@ export const DEFAULT_TEMPLATES = [
     active: true,
     description: "Tema oficial de luxo, com catálogo sofisticado, carrinho e favoritos adaptados aos seus produtos.",
     thumbnail_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
-    preview_url: null,
+    preview_url: "/store/demo-aura-maison",
   },
   {
     id: "44444444-0000-0000-0000-000000000002",
@@ -39,7 +39,7 @@ export const DEFAULT_TEMPLATES = [
     active: true,
     description: "Tema em tons de ônix e dourado com tipografia serifada de alta conversão.",
     thumbnail_url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
-    preview_url: null,
+    preview_url: "/store/demo-aurea-joalheria",
   },
   {
     id: "44444444-0000-0000-0000-000000000003",
@@ -48,7 +48,7 @@ export const DEFAULT_TEMPLATES = [
     active: true,
     description: "Design moderno e minimalista com foco total na apresentação dos produtos.",
     thumbnail_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&q=80",
-    preview_url: null,
+    preview_url: "/store/demo-minimal",
   },
 ];
 
@@ -429,19 +429,19 @@ export default function Onboarding() {
                               <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">{t.description}</p>
                             </div>
 
-                            {/* Preview Button — só aparece se o template tiver um
-                                preview_url de verdade; sem isso, window.open(null)
-                                abria uma aba em branco sem avisar nada ao lojista */}
+                            {/* Preview Button */}
                             {t.preview_url && (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   window.open(t.preview_url, '_blank');
                                 }}
-                                className="absolute top-3 left-3 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
-                                title="Ver Preview"
+                                className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-black/75 hover:bg-black/95 text-white backdrop-blur-md rounded-xl flex items-center gap-1.5 text-xs font-semibold shadow-lg transition-all hover:scale-105 border border-white/20"
+                                title="Ver Demonstração da Loja ao Vivo"
                               >
-                                <Eye className="w-5 h-5" />
+                                <Eye className="w-3.5 h-3.5 text-primary" />
+                                <span>Ver Demo</span>
                               </button>
                             )}
                           </div>

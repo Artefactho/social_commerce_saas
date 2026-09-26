@@ -26,6 +26,154 @@ import { AureaJoalheriaStorefront } from "@/features/theme/aurea-joalheria/Aurea
 
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80";
 
+const DEMO_STORES: Record<string, any> = {
+  "demo-aura-maison": {
+    store: {
+      id: "demo-aura-maison",
+      name: "Aura Maison Paris",
+      slug: "demo-aura-maison",
+      logo_url: null,
+      banner_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80",
+    },
+    themeId: "aura-maison",
+    template: { layout_key: "premium" },
+    categories: [
+      { id: "c1", name: "Destaques" },
+      { id: "c2", name: "Perfumes & Fragrâncias" },
+      { id: "c3", name: "Alta Joalheria" },
+      { id: "c4", name: "Acessórios de Couro" },
+    ],
+    products: [
+      {
+        id: "p1",
+        name: "Élixir d'Or - Eau de Parfum 100ml",
+        price: 489.90,
+        description: "Fragrância sofisticada com notas florais ambaradas e toque amadeirado exclusivo.",
+        image_url: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&q=80",
+        category: "Perfumes & Fragrâncias",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "p2",
+        name: "Colar Solitário Diamante & Ouro 18k",
+        price: 1290.00,
+        description: "Peça minimalista lapidada à mão com acabamento impecável em ouro nobre.",
+        image_url: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80",
+        category: "Alta Joalheria",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "p3",
+        name: "Bolsa Couro Legítimo Noir Royale",
+        price: 850.00,
+        description: "Design clássico atemporal com detalhes em metal dourado e forro em veludo.",
+        image_url: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&q=80",
+        category: "Acessórios de Couro",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "p4",
+        name: "Óculos de Sol Velours Vintage",
+        price: 360.00,
+        description: "Proteção UV400 com armação em acetato premium e design refinado.",
+        image_url: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600&q=80",
+        category: "Destaques",
+        status: "Ativo",
+        product_type: "physical",
+      },
+    ],
+  },
+  "demo-aurea-joalheria": {
+    store: {
+      id: "demo-aurea-joalheria",
+      name: "Áurea Joalheria Contemporânea",
+      slug: "demo-aurea-joalheria",
+      logo_url: null,
+      banner_url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1600&q=80",
+    },
+    themeId: "aurea-joalheria",
+    template: { layout_key: "aurea-joalheria" },
+    categories: [
+      { id: "c1", name: "Anéis Nobres" },
+      { id: "c2", name: "Brincos & Pérolas" },
+      { id: "c3", name: "Gargantilhas" },
+      { id: "c4", name: "Alianças Exclusivas" },
+    ],
+    products: [
+      {
+        id: "aj1",
+        name: "Anel Solitário Esmeralda & Ouro Branco",
+        price: 1850.00,
+        description: "Esmeralda colombiana autêntica cravada em ouro branco 18k.",
+        image_url: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80",
+        category: "Anéis Nobres",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "aj2",
+        name: "Brincos Cascata de Pérolas Barrocas",
+        price: 690.00,
+        description: "Pérolas naturais cultivadas com fecho de segurança antialérgico.",
+        image_url: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80",
+        category: "Brincos & Pérolas",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "aj3",
+        name: "Gargantilha Riviera Diamantes 3ct",
+        price: 3200.00,
+        description: "Brilho inigualável com cravação contínua e acabamento artesanal.",
+        image_url: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&q=80",
+        category: "Gargantilhas",
+        status: "Ativo",
+        product_type: "physical",
+      },
+    ],
+  },
+  "demo-minimal": {
+    store: {
+      id: "demo-minimal",
+      name: "Studio Minimal Store",
+      slug: "demo-minimal",
+      logo_url: null,
+      banner_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80",
+    },
+    themeId: "minimal",
+    template: { layout_key: "minimal" },
+    categories: [
+      { id: "c1", name: "Papelaria Fina" },
+      { id: "c2", name: "Decoração & Design" },
+    ],
+    products: [
+      {
+        id: "m1",
+        name: "Caderno Linen Minimalista A5",
+        price: 89.00,
+        description: "Capa em linho cru com papel pólen 90g pautado.",
+        image_url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80",
+        category: "Papelaria Fina",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "m2",
+        name: "Luminária de Mesa Nórdica em Carvalho",
+        price: 249.00,
+        description: "Madeira maciça com lâmpada filamento de LED quente.",
+        image_url: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80",
+        category: "Decoração & Design",
+        status: "Ativo",
+        product_type: "physical",
+      },
+    ],
+  },
+};
+
 const PublicStore = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -41,6 +189,18 @@ const PublicStore = () => {
 
   useEffect(() => {
     const fetchStoreData = async () => {
+      // Checa se é uma loja de demonstração para preview instantâneo de tema
+      if (slug && DEMO_STORES[slug]) {
+        const demo = DEMO_STORES[slug];
+        setStore(demo.store);
+        setTemplate(demo.template || { layout_key: demo.themeId });
+        setThemeId(demo.themeId);
+        setCategories(demo.categories);
+        setDbProducts(demo.products);
+        setIsLoading(false);
+        return;
+      }
+
       // 1. Fetch store and template details
       const { data: storeData } = await supabase
         .from("stores")
@@ -70,9 +230,7 @@ const PublicStore = () => {
           .order("sort_order", { ascending: true });
         setCategories(categoriesData || []);
 
-        // 1d. Logo (Store Configuration): stores.logo_url guarda um caminho
-        // no bucket "products" (mesmo padrão de imagem de produto), não uma
-        // URL pronta — precisa de signed URL antes de usar num <img>.
+        // 1d. Logo (Store Configuration)
         if (storeData.logo_url) {
           if (storeData.logo_url.startsWith("http")) {
             setResolvedLogoUrl(storeData.logo_url);
@@ -85,7 +243,6 @@ const PublicStore = () => {
         }
 
         // 2. Fetch products belonging to this store
-        // We use a separate query to ensure RLS is correctly applied for anonymous users
         const { data: productsData } = await supabase
           .from("products")
           .select("*")
@@ -94,12 +251,11 @@ const PublicStore = () => {
           .order("created_at", { ascending: false });
 
         if (productsData && productsData.length > 0) {
-          // 3. Generate signed URLs for all product images
           const productsWithUrls = await Promise.all(productsData.map(async (product) => {
             if (product.image_url && !product.image_url.startsWith('http')) {
               const { data: signedUrlData } = await supabase.storage
                 .from("products")
-                .createSignedUrl(product.image_url, 31536000); // 1 year expiry
+                .createSignedUrl(product.image_url, 31536000);
 
               return {
                 ...product,
