@@ -289,25 +289,78 @@ const Index = () => {
       {/* Store Builder Section */}
       <section id="templates" className="py-24 px-4 bg-secondary/30">
         <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="font-heading text-3xl md:text-5xl mb-4">Sua loja. Seu estilo.</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">Escolha um template, personalize sua identidade e publique em segundos.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-4">
+            <Sparkles size={14} />
+            TEMPLATES EXCLUSIVOS
+          </div>
+          <h2 className="font-heading text-3xl md:text-5xl mb-4">Sua loja. Sua identidade visual.</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">Escolha um dos nossos designs prontos para converter, personalize em tempo real e comece a vender hoje mesmo.</p>
         </div>
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { name: "Minimal", desc: "Clean e focado em produto.", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" },
-            { name: "Bold", desc: "Cores vibrantes e impacto visual.", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" },
-            { name: "Premium", desc: "Elegância e sofisticação.", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80" },
+            {
+              name: "Jô Perfumes & Cosméticos",
+              tag: "Perfumaria & Beleza",
+              desc: "Stories dinâmicos, carrossel de ofertas e grade refinada no estilo Instagram Shop.",
+              image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&q=80",
+              demoUrl: "/store/demo-jo-perfumes",
+            },
+            {
+              name: "Aura Maison",
+              tag: "Moda & Luxo",
+              desc: "Tema oficial de alto padrão com catálogo sofisticado, drawer de carrinho e favoritos.",
+              image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
+              demoUrl: "/store/demo-aura-maison",
+            },
+            {
+              name: "Áurea Joalheria",
+              tag: "Joias & Acessórios",
+              desc: "Contraste ônix e dourado com tipografia serifada de alta conversão.",
+              image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
+              demoUrl: "/store/demo-aurea-joalheria",
+            },
+            {
+              name: "Minimal Clean",
+              tag: "Moderno & Direto",
+              desc: "Design clean e veloz com foco total na fotografia dos produtos.",
+              image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80",
+              demoUrl: "/store/demo-minimal-clean",
+            },
           ].map((template, i) => (
             <motion.div 
               key={i}
-              whileHover={{ scale: 1.02 }}
-              className="group cursor-pointer"
+              whileHover={{ y: -6 }}
+              className="glass rounded-3xl overflow-hidden border border-white/10 bg-card flex flex-col group transition-all"
             >
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-white/20 mb-6">
-                <img src={template.image} alt={template.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                <img 
+                  src={template.image} 
+                  alt={template.name} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
+                <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-white/10">
+                  {template.tag}
+                </span>
               </div>
-              <h4 className="font-heading text-xl font-bold mb-2">{template.name}</h4>
-              <p className="text-sm text-muted-foreground">{template.desc}</p>
+              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                  <h4 className="font-heading text-lg font-bold mb-2">{template.name}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{template.desc}</p>
+                </div>
+                <div className="pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full gap-2 text-xs font-semibold hover:bg-primary hover:text-white transition-colors"
+                    asChild
+                  >
+                    <a href={template.demoUrl} target="_blank" rel="noreferrer">
+                      <Eye size={14} />
+                      Ver Demo Ao Vivo
+                    </a>
+                  </Button>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>

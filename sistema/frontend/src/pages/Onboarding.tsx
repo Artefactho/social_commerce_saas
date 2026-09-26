@@ -17,12 +17,22 @@ const steps = [
 
 // templates.layout_key -> themeId do Theme Contract (PublicStore.tsx).
 const THEME_ID_BY_LAYOUT_KEY: Record<string, string> = {
+  "jo-perfumes": "jo-perfumes",
   premium: "aura-maison",
   "aurea-joalheria": "aurea-joalheria",
   minimal: "aura-maison",
 };
 
 export const DEFAULT_TEMPLATES = [
+  {
+    id: "44444444-0000-0000-0000-000000000000",
+    name: "Jô Perfumes & Cosméticos",
+    layout_key: "jo-perfumes",
+    active: true,
+    description: "Tema estilo Instagram Shop com Stories em destaque, Bio de perfil verificada, Hero Carousel e Bottom Nav mobile.",
+    thumbnail_url: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&q=80",
+    preview_url: "/store/demo-jo-perfumes",
+  },
   {
     id: "44444444-0000-0000-0000-000000000001",
     name: "Aura Maison",
@@ -449,6 +459,9 @@ export default function Onboarding() {
                           {/* Layout Features Badge */}
                           <div className="p-3 bg-background/50 backdrop-blur-sm border-t">
                             <div className="flex flex-wrap gap-1">
+                              {t.layout_key === 'jo-perfumes' && ['Stories Instagram', 'Social Commerce', 'Bio Perfil'].map(tag => (
+                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/20">{tag}</span>
+                              ))}
                               {t.layout_key === 'minimal' && ['Clean', 'Elegante', 'Minimalista'].map(tag => (
                                 <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">{tag}</span>
                               ))}

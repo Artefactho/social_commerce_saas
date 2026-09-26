@@ -20,6 +20,7 @@ import { Product as ThemeProduct } from "@/data/products";
 import { AuraMaisonStorefront } from "@/features/theme/aura-maison/AuraMaisonStorefront";
 import { ThemeCategory } from "@/features/theme/aura-maison/Header";
 import { AureaJoalheriaStorefront } from "@/features/theme/aurea-joalheria/AureaJoalheriaStorefront";
+import { JoPerfumesStorefront } from "@/features/theme/jo-perfumes/JoPerfumesStorefront";
 
 // Os produtos agora são carregados dinamicamente do banco de dados.
 // Mantemos uma estrutura inicial vazia ou mockada caso a busca falhe.
@@ -27,6 +28,65 @@ import { AureaJoalheriaStorefront } from "@/features/theme/aurea-joalheria/Aurea
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80";
 
 const DEMO_STORES: Record<string, any> = {
+  "demo-jo-perfumes": {
+    store: {
+      id: "demo-jo-perfumes",
+      name: "Jô Perfumes & Cosméticos",
+      slug: "demo-jo-perfumes",
+      logo_url: null,
+      banner_url: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1600&q=80",
+    },
+    themeId: "jo-perfumes",
+    template: { layout_key: "jo-perfumes" },
+    categories: [
+      { id: "c1", name: "Feminino" },
+      { id: "c2", name: "Masculino" },
+      { id: "c3", name: "Lançamentos" },
+      { id: "c4", name: "Kits & Presentes" },
+    ],
+    products: [
+      {
+        id: "jp1",
+        name: "Âmbar Dourado Eau de Parfum 100ml",
+        price: 189.90,
+        description: "Fragrância marcante com notas de baunilha, âmbar e flor de laranjeira.",
+        image_url: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&q=80",
+        category: "Feminino",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "jp2",
+        name: "Noir Absolu Intense 100ml",
+        price: 219.90,
+        description: "Amadeirado especiado elegante com notas de couro, cedro e pimenta preta.",
+        image_url: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80",
+        category: "Masculino",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "jp3",
+        name: "Rosa Delicata Parfum Floral 75ml",
+        price: 159.90,
+        description: "Buquê floral fresco com rosas de Grasse, peônia e almíscar branco.",
+        image_url: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=600&q=80",
+        category: "Lançamentos",
+        status: "Ativo",
+        product_type: "physical",
+      },
+      {
+        id: "jp4",
+        name: "Kit Presente Dourado Exclusivo",
+        price: 299.90,
+        description: "Contém 1 Perfume 100ml + 1 Hidratante Perfumado 200ml em caixa premium.",
+        image_url: "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=600&q=80",
+        category: "Kits & Presentes",
+        status: "Ativo",
+        product_type: "physical",
+      },
+    ],
+  },
   "demo-aura-maison": {
     store: {
       id: "demo-aura-maison",
@@ -297,10 +357,8 @@ const PublicStore = () => {
     );
   }
 
-  // Fase 4 (fatia essencial): loja com Theme Contract "aura-maison" usa o
-  // tema oficial adaptado; qualquer outra loja continua no renderer
-  // genérico de 3 layouts abaixo (minimal/bold/premium), inalterado.
-  if (themeId === "aura-maison" || themeId === "aurea-joalheria") {
+  // Themes oficiais compatíveis com o Theme Contract
+  if (themeId === "aura-maison" || themeId === "aurea-joalheria" || themeId === "jo-perfumes") {
     const themeProducts: ThemeProduct[] = dbProducts.map((p) => ({
       id: p.id,
       name: p.name,
@@ -321,6 +379,17 @@ const PublicStore = () => {
       logo_url: resolvedLogoUrl,
       banner_url: store.banner_url,
     };
+
+    if (themeId === "jo-perfumes") {
+      return (
+        <JoPerfumesStorefront
+          store={storeInfo}
+          categories={categories}
+          products={themeProducts}
+          colors={themeColors}
+        />
+      );
+    }
 
     if (themeId === "aurea-joalheria") {
       return (

@@ -962,8 +962,9 @@ const Dashboard = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   {[
                     { id: null as string | null, name: "Padrão", description: "Layout genérico (minimal, bold ou premium — definido na aba Aparência)." },
-                    { id: "aura-maison", name: "Aura Maison", description: "Tema oficial com catálogo, carrinho e favoritos adaptados aos seus produtos." },
-                    { id: "aurea-joalheria", name: "Aurea Joalheria", description: "Tema em tons de ônix e dourado, com tipografia serifada — catálogo, carrinho e favoritos adaptados aos seus produtos." },
+                    { id: "jo-perfumes", name: "Jô Perfumes & Cosméticos", description: "Tema exclusivo para perfumaria e cosméticos, com stories, carrossel dinâmico e catálogo refinado." },
+                    { id: "aura-maison", name: "Aura Maison", description: "Tema oficial de moda e luxo com catálogo sofisticado, carrinho e favoritos adaptados." },
+                    { id: "aurea-joalheria", name: "Aurea Joalheria", description: "Tema em tons de ônix e dourado, com tipografia serifada para joalherias e acessórios de alto padrão." },
                   ].map((option) => {
                     const currentThemeId = themeConfig?.config?.themeId ?? null;
                     const isActive = currentThemeId === option.id;
