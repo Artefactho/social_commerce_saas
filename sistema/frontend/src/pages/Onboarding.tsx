@@ -53,12 +53,12 @@ export const DEFAULT_TEMPLATES = [
 ];
 
 const categories = [
-  { id: "Fashion", label: "Fashion" },
-  { id: "Beauty", label: "Beauty" },
-  { id: "Food", label: "Food" },
-  { id: "Electronics", label: "Electronics" },
-  { id: "Personal", label: "Personal" },
-  { id: "Other", label: "Other" },
+  { id: "Fashion", label: "Moda & Vestuário", desc: "Roupas, calçados, bolsas e joias", icon: "👗" },
+  { id: "Beauty", label: "Beleza & Cosméticos", desc: "Perfumes, maquiagem e skincare", icon: "✨" },
+  { id: "Food", label: "Alimentos & Bebidas", desc: "Doces artesanais, lanches e bebidas", icon: "☕" },
+  { id: "Electronics", label: "Eletrônicos & Tech", desc: "Gadgets, smartphones e informática", icon: "📱" },
+  { id: "Personal", label: "Casa & Cuidados", desc: "Decoração, saúde e bem-estar", icon: "🌿" },
+  { id: "Other", label: "Outros Segmentos", desc: "Variedades, artes e serviços", icon: "🛍️" },
 ];
 
 export default function Onboarding() {
@@ -68,7 +68,7 @@ export default function Onboarding() {
   const [dbTemplates, setDbTemplates] = useState<any[]>(DEFAULT_TEMPLATES);
   const [formData, setFormData] = useState({
     name: "",
-    category: "Other",
+    category: "Fashion",
     templateId: DEFAULT_TEMPLATES[0].id,
     slug: "",
   });
@@ -349,19 +349,33 @@ export default function Onboarding() {
 
                 {currentStep === 2 && (
                   <div className="space-y-4">
-                    <Label>Qual a categoria do seu negócio?</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xl font-heading">Qual a categoria do seu negócio?</Label>
+                      <p className="text-sm text-muted-foreground">Selecione o segmento principal para personalizar a experiência da sua loja.</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                       {categories.map((cat) => (
                         <button
+                          type="button"
                           key={cat.id}
                           onClick={() => setFormData({ ...formData, category: cat.id })}
-                          className={`p-4 rounded-xl border text-sm font-medium transition-all ${
+                          className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between gap-3 ${
                             formData.category === cat.id
-                              ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                              : "bg-background hover:border-primary/50"
+                              ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-[1.02]"
+                              : "bg-background/80 hover:border-primary/50 hover:bg-secondary/40"
                           }`}
                         >
-                          {cat.label}
+                          <div className="text-2xl">{cat.icon}</div>
+                          <div>
+                            <div className="font-bold text-sm tracking-tight">{cat.label}</div>
+                            <div
+                              className={`text-xs mt-0.5 leading-snug ${
+                                formData.category === cat.id ? "text-primary-foreground/80" : "text-muted-foreground"
+                              }`}
+                            >
+                              {cat.desc}
+                            </div>
+                          </div>
                         </button>
                       ))}
                     </div>
