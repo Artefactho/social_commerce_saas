@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowRight, Loader2, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,23 @@ import { toast } from "sonner";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
-  // Fluxo padrão do Supabase Auth (resetPasswordForEmail): "forgot" mostra só o
-  // campo de e-mail e manda o link de recuperação; o passo de definir a nova
-  // senha acontece em /reset-password (ResetPassword.tsx), pra onde o link do
-  // e-mail redireciona.
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const location = useLocation();
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(
+    location.pathname === "/signup" ? "signup" : "login"
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.pathname === "/signup") {
+      setMode("signup");
+    } else if (location.pathname === "/login") {
+      setMode("login");
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -59,7 +66,7 @@ export default function Auth() {
 
         if (data.user) {
           toast.success("Cadastro realizado com sucesso!");
-          navigate("/dashboard");
+          navigate("/onboarding");
         }
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
