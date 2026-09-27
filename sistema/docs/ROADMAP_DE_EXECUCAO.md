@@ -142,6 +142,12 @@ estrutural deve ser necessário para adicionar o 2º tema depois.
       um formulário que salva e não aparece em lugar nenhum). Ver "Nota de processo"
       no topo deste documento: item que já estava prometido em
       `VISAO_E_MODELO_DE_NEGOCIO.md` seção 6.4 e nunca tinha sido formalizado aqui.
+- [ ] **Evolução do escopo de temas (Checkpoint 96fdef9)**: O escopo original previa 1
+      tema oficial (Aura Maison). O projeto evoluiu para registrar 5 temas oficiais
+      (Base Theme, Minimal Clean, Aura Maison, Áurea Joalheria, Jô Perfumes) no
+      `ThemeRegistry`, com injeção dinâmica de tokens CSS e customizador visual
+      `VisualStoreEditor` com Live Preview.
+
 
 ## Fase 5 — Checkout
 

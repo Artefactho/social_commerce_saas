@@ -6,63 +6,32 @@ aqui, não na cabeça do agente.
 
 ---
 
-## Estado atual
+## Estado atual — Checkpoint 96fdef9
 
 ```text
-Fase atual:        Fase 0, 1, 3 e 4 (incluindo 4.1) — COMPLETAS. Fase 2 —
-                    quase completa (falta só ligar o billing real dos
-                    planos, que é Fase 6). Próximo item real do roadmap:
-                    Fase 5 (Checkout desacoplado de verdade, Pix real,
-                    WhatsApp, deploy real).
-Último item feito: Fase 4.1 (genericização completa do tema Aura Maison)
-                    fechada — ver diagnóstico completo e achado principal
-                    na seção "FASE 4.1" abaixo. Resumo: a auditoria
-                    (grep + leitura integral dos 11 arquivos do tema)
-                    confirmou que a genericização já estava, na prática,
-                    feita desde a Fase 4 — os componentes do tema foram
-                    escritos do zero para consumir dados reais, não
-                    copiados do zip de referência por find-replace, então
-                    nunca carregaram o conteúdo fictício de joalheria que
-                    precisaria ser removido agora. Validado com uma loja de
-                    teste de nicho deliberadamente diferente (eletrônicos)
-                    via Playwright: zero resíduo de marca/cupom/CNPJ/
-                    WhatsApp fictícios em toda a vitrine pública, nome/
-                    categoria/produto reais corretos, cor e logo
-                    customizados aplicados de verdade, carrinho sem cupom
-                    duplicado indo pro `/checkout` real, zero erros de
-                    console. Nenhuma migration nova foi criada. Dois
-                    subitens do levantamento original ficam como trabalho
-                    futuro explícito (não lacuna silenciosa), por
-                    dependerem de schema ainda não decidido: WhatsApp/
-                    endereço/redes sociais reais, e rating/reviews/
-                    variantes de produto reais.
-Próximo item:      Fase 5 (Checkout desacoplado de verdade, Pix real via
-                    Mercado Pago, WhatsApp, cancelamento/reembolso básico,
-                    deploy real Amplify+Supabase Cloud FREE) — não
-                    iniciada nesta sessão por pedido explícito do usuário.
-
-NOTA sobre a pausa por memória (2026-09-13, resolvida): a validação E2E da
-                    Fase 3 foi pausada por falta de memória (vmmemWSL/Docker
-                    consumindo 4,5GB, só 1,5GB livres). O usuário conseguiu
-                    liberar memória manualmente sem precisar reiniciar o PC
-                    de fato (um reinício aconteceu por outro motivo depois,
-                    interrompendo a sessão, mas o trabalho foi retomado do
-                    zero sem perda). Ao retomar, um bug REAL foi encontrado
-                    e corrigido (ver histórico abaixo) — o teste de navegador
-                    valeu a pena mesmo com o custo extra de memória: os 20
-                    testes SQL sozinhos não o teriam pego.
-Stack definida:     SIM — ver /adr (0001 a 0006) e CLAUDE.md seção 2.
-Projeto Supabase:  Projeto novo criado pelo dono do produto
-                    (ubuuccnbqacozcdljuay) — `.env` do frontend já atualizado.
-                    Baseline squashada aplicada nele via `supabase db push`
-                    e revalidada com a mesma bateria de isolamento (6/6 OK),
-                    schema e contagem de policies (16) idênticos ao ambiente
-                    local. Senha do banco desse projeto, que havia aparecido
-                    numa conversa anterior (erro de digitação do usuário),
-                    trocada pelo usuário em Project Settings → Database
-                    (2026-09-17) — item resolvido, sem exposição pendente.
-Última atualização: 2026-09-17
-Bloqueios abertos:  nenhum
+Checkpoint Git:     96fdef9 (feat: checkpoint consolidado do commerce saas)
+Branch / Remote:    main alinhada com origin/main (sincronizado)
+Status das Fases:   Fase 0 [OK], Fase 1 [OK], Fase 2 [PARCIAL], Fase 3 [PARCIAL],
+                    Fase 4 [OK], Fase 5 [PARCIAL], Fase 6 [FALTANDO],
+                    Fase 7 [FALTANDO], Fase 8 [FALTANDO].
+Último marco feito: Checkpoint oficial 96fdef9 consolidando: 13 docs de arquitetura,
+                    5 temas oficiais (Base, Minimal, Aura Maison, Áurea Joalheria,
+                    Jô Perfumes) no ThemeRegistry, VisualStoreEditor com live preview,
+                    tokens CSS dinâmicos, frete condicional, WhatsApp checkout,
+                    9 Edge Functions do Supabase (create-order, MP Connect/Callback,
+                    Webhook, Cancelamento, Refund com CAS), 4 migrações SQL e
+                    suíte de 95 testes (20 arquivos, 100% PASS local).
+Evidências Reais:   - Isolamento multi-tenant e RLS: 12/12 SQL OK nos dois bancos.
+                    - Edge Functions remotas: create-order testada com requests HTTP.
+                    - Vitrine pública e DOM: 5 temas renderizados contra loja real.
+                    - Testes locais Vitest: 95/95 PASS (unitários, DOM e adversariais).
+Gaps em Aberto:     1. Gateway Mercado Pago Real: Chamadas reais de Pix/OAuth/Refund
+                       ainda não validadas contra credenciais de produção de lojista.
+                    2. Webhook Real: Não testado com requisições externas do MP.
+                    3. Vínculo Customers ↔ Orders: Orders ainda gravam dados inline.
+                    4. Tabela plans: Vazia no Supabase remoto (seed só local).
+                    5. Deploy de Produção: Não realizado (nem Amplify nem Fargate).
+Bloqueios abertos:  Nenhum bloqueio técnico. Próximo passo é teste de sandbox do MP.
 ```
 
 **Nota histórica importante**: este projeto NÃO começa do zero. Existe um código
@@ -351,21 +320,53 @@ correção de conteúdo fictício):
   novo de avaliações/variantes, fora do roadmap atual. Fallback gracioso
   já é suficiente para o MVP sem essa feature.
 
-### Fase 5 — Checkout
-- [ ] Checkout desacoplado do tema — UI já existe, falta desacoplar de verdade
-- [ ] Frete condicional (físico/digital)
-- [ ] Pix via Mercado Pago (hoje é só simulado)
-- [ ] WhatsApp
-- [ ] Cancelamento/Reembolso básico
-- [ ] **Marco: primeiro deploy real** (Amplify + Supabase Cloud FREE)
+### Fase 2 — Site `[PARCIAL]`
+- [x] Home institucional — `Index.tsx` real (não mockup), com seção "Como Funciona", "Recursos", "Templates" e seção-âncora "Preços".
+- [x] Página de planos dedicada (`/planos`, `Planos.tsx`) — busca `plans` real.
+- [!] **Pendência**: A tabela `plans` está vazia no projeto Supabase remoto (seed de planos aplicado somente no ambiente local).
+- [x] Login / cadastro / recuperação de senha — `Auth.tsx` + `ResetPassword.tsx`.
+- [x] Onboarding completo ligado a Organization — cria `organization` + `store` + `store_theme_configs` de verdade.
+- [ ] **Deploy de produção**: Não realizado (Amplify Hosting).
 
-### Fase 6 — Billing
+### Fase 3 — Commerce Core `[PARCIAL]`
+- [x] Lojas (CRUD + slug) — ligado a Organization.
+- [x] Categorias (tabela `categories` + UI no dashboard + isolamento).
+- [x] Produtos com `product_type` (`physical`/`digital`) — frete condicional real no Checkout.
+- [x] Cupons/Descontos (tabela `coupons` + UI + escopo por loja no checkout).
+- [x] Criação segura de pedidos no servidor (`create-order` Edge Function com validação de preços contra Postgres).
+- [!] **Pendência**: A tabela `customers` existe e tem RLS, mas o checkout público ainda grava dados inline em `orders` sem criar/vincular formalmente o `customer_id`.
+
+### Fase 4 — Theme Contract & Engine Visual `[OK]` (no escopo local/staging)
+- [x] Theme Contract adotado (`skills/theme-contract.md` + `types/theme.ts`).
+- [x] 5 temas oficiais implementados: Base Theme, Minimal Clean, Aura Maison, Áurea Joalheria e Jô Perfumes.
+- [x] `ThemeRegistry.ts` dinâmico e desacoplado.
+- [x] Injeção dinâmica de CSS variables (`themeTokens.ts`) no DOM.
+- [x] Customizador visual (`VisualStoreEditor.tsx`) com Live Preview reativo.
+- [x] Validado contra loja real no Supabase (`StorefrontDOMVerification.test.tsx`, `RealStoreAudit.test.ts`).
+- [ ] **Deploy de produção**: Não realizado.
+
+### Fase 5 — Checkout & Gateway Mercado Pago `[PARCIAL]`
+- [x] Checkout desacoplado do tema (`Checkout.tsx` consumindo `useShippingCalculator` e `OrderService`).
+- [x] Frete condicional e cálculo de frete grátis por loja.
+- [x] Módulo e botão de finalização via WhatsApp (`whatsapp.ts`, `WhatsAppCheckoutDOM.test.tsx`).
+- [x] Edge Functions Supabase escritas e migradas:
+  - `create-order`: Criação transacional e idempotente.
+  - `mercadopago-connect` & `mercadopago-callback`: OAuth Gateway para lojistas.
+  - `mercadopago-webhook`: Notificações de pagamento com lock e idempotência.
+  - `mercadopago-cancel-order` & `mercadopago-refund-order`: Cancelamento e estorno com Claim/CAS.
+- [x] Suíte adversarial completa aprovada com mocks (`MercadoPagoAdversarialSuite.test.ts`, `OrderCancellationRefundSuite.test.ts`).
+- [ ] **Integração Real Mercado Pago**: NÃO VALIDADA (pendente credenciais reais de lojista no sandbox/produção).
+- [ ] **Webhook Real**: NÃO VALIDADO (pendente URL pública/ngrok recebendo evento real do MP).
+- [ ] **Refund Real**: NÃO VALIDADO (pendente estorno real em conta bancária de teste).
+- [ ] **Marco: primeiro deploy real** (Amplify + Supabase Cloud FREE) — pendente.
+
+### Fase 6 — Billing `[FALTANDO]`
 - [ ] Planos configuráveis
 - [ ] Assinaturas
 - [ ] Checagem de limite simples por plano
-- [ ] Upgrade Supabase Cloud FREE → Pro (só aqui, com primeiro cliente pagante)
+- [ ] Upgrade Supabase Cloud FREE → Pro
 
-### Fase 7 — Admin
+### Fase 7 — Admin `[FALTANDO]`
 - [ ] Painel de usuários
 - [ ] Painel de organizações
 - [ ] Painel de lojas
@@ -374,7 +375,7 @@ correção de conteúdo fictício):
 - [ ] Auditoria
 - [ ] LGPD (exclusão/exportação de dados)
 
-### Fase 8 — Escala
+### Fase 8 — Escala `[FALTANDO]`
 - [ ] Revisão de índices e queries
 - [ ] Cache com contexto de tenant
 - [ ] Storage com namespace por tenant
@@ -386,9 +387,79 @@ correção de conteúdo fictício):
 
 ---
 
+## Estado consolidado — checkpoint 96fdef9
+
+```text
+Checkpoint Git: 96fdef9
+Branch:         main
+Remote:         origin/main
+Estado:         sincronizado
+
+Fases:
+Fase 0 — [OK]
+Fase 1 — [OK]
+Fase 2 — [PARCIAL]
+Fase 3 — [PARCIAL]
+Fase 4 — [OK]
+Fase 5 — [PARCIAL]
+Fase 6 — [FALTANDO]
+Fase 7 — [FALTANDO]
+Fase 8 — [FALTANDO]
+```
+
+### Detalhamento por Camada (Implementado vs Testado vs Real vs Produção)
+
+| Camada / Funcionalidade | Código | Teste Local | Integração Remota | API Externa Real | Deploy Produção | Status Real |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Fase 0: Arquitetura & ADRs** | SIM | SIM | N/A | N/A | N/A | `[OK]` |
+| **Fase 1: RLS & RBAC Multi-Tenant** | SIM | 12/12 SQL | SIM (Supabase Remoto) | N/A | NÃO | `[OK]` |
+| **Fase 2: Landing, Auth & Onboarding** | SIM | 3/3 Vitest | PARCIAL (Plans vazios) | N/A | NÃO | `[PARCIAL]` |
+| **Fase 3: Commerce Core & Hardening** | SIM | 20/20 SQL + Vitest | SIM (Supabase Remoto) | N/A | NÃO | `[PARCIAL]` |
+| **Fase 4: 5 Temas & Editor Visual** | SIM | 26/26 Vitest/DOM | SIM (Loja real no DB) | N/A | NÃO | `[OK]` |
+| **Fase 5: Checkout & Edge Functions MP** | SIM | 31/31 Adversarial | SIM (Edge Functions) | NÃO VALIDADO | NÃO | `[PARCIAL]` |
+| **Fase 6: Billing SaaS** | NÃO | NÃO | NÃO | NÃO | NÃO | `[FALTANDO]` |
+| **Fase 7: Super Admin** | NÃO | NÃO | NÃO | NÃO | NÃO | `[FALTANDO]` |
+| **Fase 8: Escala & Self-Host** | NÃO | NÃO | NÃO | NÃO | NÃO | `[FALTANDO]` |
+
+### Divergências Documentais Identificadas
+
+```text
+[DIVERGÊNCIA 1] — PROGRESS.md desatualizado
+Documento: O arquivo parava na entrada de 2026-09-25 indicando Fase 5 como "NÃO INICIADA".
+Código: O commit 96fdef9 contém 9 Edge Functions, 4 migrações SQL, 24 arquivos de teste e implementação completa de checkout, gateway e reembolso.
+Resolução: Documentação atualizada para registrar todo o trabalho consolidado no checkpoint 96fdef9.
+
+[DIVERGÊNCIA 2] — Evolução do Escopo de Temas
+Documento: ROADMAP_DE_EXECUCAO.md original previa 1 tema oficial (Aura Maison).
+Código: O projeto evoluiu para 5 temas oficiais (Base, Minimal, Aura Maison, Áurea Joalheria, Jô Perfumes) com ThemeRegistry dinâmico e VisualStoreEditor.
+Resolução: Registrado como evolução do escopo da Fase 4, preservando o histórico original.
+
+[DIVERGÊNCIA 3] — Vínculo de Clientes (customer-engine)
+Documento: docs/architecture/customer-engine.md descreve vínculo formal customer_id em todo pedido.
+Código: Checkout.tsx e create-order persistem dados do comprador inline em orders sem vincular à tabela customers.
+Resolução: Registrado como pendência técnica da Fase 3/5 para alinhamento futuro.
+
+[DIVERGÊNCIA 4] — Tabela plans no Supabase Remoto
+Documento: Página /planos busca registros reais de plans.
+Código / Ambiente: A tabela plans está povoada apenas no seed.sql local; no Supabase Cloud remoto permanece com 0 linhas.
+Resolução: Registrado como pendência de dados no ambiente remoto.
+```
+
+### Principais Gaps Técnicos Atuais
+
+1. **Mercado Pago Sandbox / API Real**: Realizar teste ponta a ponta de emissão de PIX com credenciais de teste reais nas Edge Functions remotas.
+2. **Webhook Real do Mercado Pago**: Validar recepção de evento HTTP externo com assinatura via URL pública (ngrok/Cloudflare).
+3. **Refund Real no Gateway**: Validar estorno de pagamento real através da API do Mercado Pago.
+4. **Vínculo `customers ↔ orders`**: Ajustar `create-order` e checkout para gravação idempotente de clientes na tabela `customers`.
+5. **População da tabela `plans` Remota**: Executar inserção dos planos oficiais no Supabase Cloud.
+6. **Primeiro Deploy Real**: Configurar build e hosting no AWS Amplify Hosting apontando para o Supabase Cloud.
+
+---
+
 ## Histórico de sessões
 
 > Cada sessão adiciona uma entrada aqui. Não apagar entradas antigas.
+
 
 ```text
 [2026-09-13] — Consolidação da documentação (Fase 0). Leitura completa dos 7 arquivos
@@ -1183,22 +1254,31 @@ correção de conteúdo fictício):
               Pendências deixadas: nenhuma nova. Fase 5 e os outros 4
               templates seguem sem confirmação do usuário.
 
-[2026-09-25] — Resolvida a lacuna "onboarding × Theme Contract
-              desconectados" registrada em 2026-09-17, a pedido do usuário.
-              `Onboarding.tsx` agora, depois de criar a loja e o
-              `store_templates`, grava `store_theme_configs.config.themeId`
-              (mesmo campo da aba Tema do Dashboard) a partir de um mapa
-              `layout_key -> themeId` (`premium -> aura-maison`,
-              `aurea-joalheria -> aurea-joalheria`); templates sem tema
-              oficial (minimal/bold) não gravam nada e seguem no renderer
-              genérico. Efeito: a loja nasce com o tema escolhido já ativo,
-              sem precisar reativar na aba Tema. Só o `tsc --noEmit` foi
-              rodado (limpo); NÃO validado em navegador — dev server local
-              estava parado. ASSUMPTION (baixo impacto): o mapa é hardcoded
-              no frontend; todo tema novo precisa de uma linha nele (junto
-              da linha em `templates` e da entrada no Dashboard). Nada
-              aplicado ao Supabase real.
-              Decisões tomadas: nenhuma nova. Pendências deixadas: validar o
-              fluxo no navegador (cadastro -> escolher tema -> vitrine já com
-              o tema); Fase 5 e os outros 4 templates seguem sem confirmação.
+[2026-09-27] — Consolidação oficial do Checkpoint 96fdef9 e Auditoria Geral:
+              (1) Arquitetura e Especificações: Adicionados 13 documentos de
+              engenharia em docs/architecture/ cobrindo checkout, commerce engine,
+              customer engine, design system, section engine, SEO/social, shipping,
+              store engine, theme engine e theme registry.
+              (2) Temas e Editor Visual (Fase 4): Formalizados os 5 temas oficiais
+              (Base Theme, Minimal Clean, Aura Maison, Áurea Joalheria e Jô Perfumes)
+              com registro dinâmico em ThemeRegistry.ts, tokens CSS injetados via
+              themeTokens.ts e customizador visual completo com Live Preview em
+              VisualStoreEditor.tsx.
+              (3) Checkout e Gateway Mercado Pago (Fase 5): Implementação de checkout
+              desacoplado com frete condicional (useShippingCalculator), botão de
+              WhatsApp formatado (whatsapp.ts), 9 Edge Functions Supabase (create-order,
+              mercadopago-connect, callback, connection-status, webhook com lock,
+              cancel-order e refund-order com Claim/CAS) e 4 novas migrações SQL.
+              (4) Validação Automatizada: 20 arquivos de teste Vitest com 95 testes
+              aprovados (100% PASS local), incluindo suítes adversariais para gateway,
+              reembolso, injeção de tokens e renderização DOM dos 5 temas.
+              (5) Auditoria de Gaps: Registrado com rigor que, embora o código e
+              os testes de contrato existam, a integração real contra a API do
+              Mercado Pago, o recebimento de webhooks reais e o deploy de produção
+              permanecem como pendências abertas da Fase 5.
+              Decisões tomadas: Não considerar Fase 5 como [OK] até validação em
+              sandbox/produção com gateway real; catalogar divergências documentais.
+              Pendências deixadas: Prova de integração no sandbox do Mercado Pago;
+              vínculo de customers em create-order; seed de plans no banco remoto;
+              deploy inicial no AWS Amplify Hosting.
 ```
