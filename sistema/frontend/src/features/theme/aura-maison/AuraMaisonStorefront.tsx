@@ -87,7 +87,14 @@ export const AuraMaisonStorefront: React.FC<AuraMaisonStorefrontProps> = ({ stor
   const wishlistIds = wishlist.items.map((p) => p.id);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-stone-800 font-sans">
+    <div 
+      className="min-h-screen flex flex-col transition-colors duration-200"
+      style={{
+        backgroundColor: "var(--theme-background, #FAF8F5)",
+        color: "var(--theme-text, #292524)",
+        fontFamily: "var(--theme-font-body, 'Plus Jakarta Sans', sans-serif)",
+      }}
+    >
       <TopBanner />
 
       <Header

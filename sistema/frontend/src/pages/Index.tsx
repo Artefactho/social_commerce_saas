@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, ShoppingBag, Zap, Layout as LayoutIcon, Globe, MessageSquare, Instagram, Smartphone, BarChart3, Palette, CheckCircle2, Package, Users, ChevronDown } from "lucide-react";
+import { ArrowRight, ShoppingBag, Zap, Layout as LayoutIcon, Globe, MessageSquare, Instagram, Smartphone, BarChart3, Palette, CheckCircle2, Package, Users, ChevronDown, Sparkles, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroMockup } from "@/components/HeroMockup";
 import { DashboardMockup } from "@/components/DashboardMockup";
@@ -296,8 +296,15 @@ const Index = () => {
           <h2 className="font-heading text-3xl md:text-5xl mb-4">Sua loja. Sua identidade visual.</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">Escolha um dos nossos designs prontos para converter, personalize em tempo real e comece a vender hoje mesmo.</p>
         </div>
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {[
+            {
+              name: "Base Theme",
+              tag: "E-commerce Completo",
+              desc: "Tema clássico multi-propósito com sliders, banners informativos, instafeed e WhatsApp.",
+              image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
+              demoUrl: "/store/demo-base-theme",
+            },
             {
               name: "Jô Perfumes & Cosméticos",
               tag: "Perfumaria & Beleza",

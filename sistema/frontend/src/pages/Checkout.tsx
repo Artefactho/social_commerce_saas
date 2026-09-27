@@ -6,10 +6,14 @@ import {
   Trash2, 
   Plus, 
   Minus, 
-  ShieldCheck,
-  CreditCard,
-  QrCode,
-  Loader2
+  ShieldCheck, 
+  CreditCard, 
+  QrCode, 
+  Loader2,
+  Copy,
+  CheckCircle2,
+  Clock,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,41 +23,104 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
+import { createSecureOrder } from "@/services/order/OrderService";
+import { 
+  buildWhatsAppLink, 
+  buildCartWhatsAppMessage, 
+  buildOrderWhatsAppMessage 
+} from "@/utils/whatsapp";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, getSubtotal, storeSlug: cartStoreSlug, clearCart } = useCart();
-  const [step, setStep] = useState("cart"); // cart, shipping, payment, success
+  const [step, setStep] = useState<"cart" | "shipping" | "payment" | "pix_waiting" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   const [storeData, setStoreData] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
+    cpf: "",
     zip: "",
     address: ""
   });
-  const [paymentMethod, setPaymentMethod] = useState("credit_card");
+  const [paymentMethod, setPaymentMethod] = useState("pix");
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState<any>(null);
+  const [copiedPix, setCopiedPix] = useState(false);
 
   useEffect(() => {
-    const fetchStoreShipping = async (slugToFetch: string) => {
+    const fetchStoreDetails = async (slugToFetch: string) => {
       if (!slugToFetch) return;
-      const { data } = await supabase
+      const { data: storeRow } = await supabase
         .from("stores")
-        .select("id, slug, shipping_fee")
+        .select("id, slug, name, shipping_fee")
         .eq("slug", slugToFetch)
-        .single();
-      if (data) setStoreData(data);
+        .maybeSingle();
+
+      if (storeRow) {
+        const { data: themeConfigRow } = await supabase
+          .from("store_theme_configs")
+          .select("config")
+          .eq("store_id", storeRow.id)
+          .maybeSingle();
+
+        const config = (themeConfigRow?.config as any) || null;
+        setStoreData({
+          ...storeRow,
+          whatsapp: config?.social?.whatsapp || null,
+          whatsappMessage: config?.social?.whatsappMessage || null,
+        });
+      }
     };
-    fetchStoreShipping(cartStoreSlug || "");
+    fetchStoreDetails(cartStoreSlug || "");
   }, [cartStoreSlug]);
 
+  // Polling de Confirmação do Pagamento Pix
+  useEffect(() => {
+    let interval: any = null;
+    if (step === "pix_waiting" && createdOrder?.orderId) {
+      interval = setInterval(async () => {
+        try {
+          const { data } = await supabase.functions.invoke("check-order-status", {
+            headers: { "Content-Type": "application/json" },
+            body: {},
+          });
+
+          // Se a function retornar is_paid ou se a consulta no banco indicar paid
+          if (data?.is_paid) {
+            clearInterval(interval);
+            toast.success("Pagamento confirmado com sucesso!");
+            setStep("success");
+            return;
+          }
+
+          // Fallback via consulta direta segura
+          const { data: orderRow } = await supabase
+            .from("orders")
+            .select("status")
+            .eq("id", createdOrder.orderId)
+            .single();
+
+          if (orderRow?.status === "paid") {
+            clearInterval(interval);
+            toast.success("Pagamento confirmado com sucesso!");
+            setStep("success");
+          }
+        } catch {
+          // Polling silencioso
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [step, createdOrder]);
+
   const subtotal = getSubtotal();
-  // Regra inegociável #2 (CLAUDE.md): frete nunca se aplica a produto
-  // digital. Um carrinho só com produtos digitais nunca cobra/exibe frete.
   const hasPhysicalItem = items.some((item) => item.product.product_type !== "digital");
   const shipping = hasPhysicalItem ? (storeData?.shipping_fee || 0) : 0;
   const discount = appliedCoupon
@@ -63,6 +130,34 @@ const Checkout = () => {
     : 0;
   const total = Math.max(subtotal + shipping - discount, 0);
 
+  // Geração de Links de WhatsApp seguros e escopados pelo Tenant
+  const cartWhatsAppLink = storeData?.whatsapp ? buildWhatsAppLink({
+    phone: storeData.whatsapp,
+    message: buildCartWhatsAppMessage({
+      storeName: storeData.name || "Minha Loja",
+      items: items.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        product_type: item.product.product_type,
+      })),
+      subtotal,
+      shipping,
+      discount,
+      couponCode: appliedCoupon?.code,
+    }),
+  }) : null;
+
+  const orderWhatsAppLink = (storeData?.whatsapp && createdOrder?.orderId) ? buildWhatsAppLink({
+    phone: storeData.whatsapp,
+    message: buildOrderWhatsAppMessage({
+      storeName: storeData.name || "Minha Loja",
+      orderId: createdOrder.orderId,
+      totalAmount: createdOrder.totalAmount || total,
+      paymentMethod,
+    }),
+  }) : null;
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -71,8 +166,6 @@ const Checkout = () => {
     if (!couponCode.trim() || !storeData?.id) return;
     setIsApplyingCoupon(true);
     try {
-      // Sempre escopado por store_id + code: um cupom da Loja A nunca é
-      // encontrado (e portanto nunca aceito) checando o carrinho da Loja B.
       const { data, error } = await supabase
         .from("coupons")
         .select("*")
@@ -98,6 +191,14 @@ const Checkout = () => {
     }
   };
 
+  const handleCopyPix = () => {
+    if (!createdOrder?.payment?.pixCopyPaste) return;
+    navigator.clipboard.writeText(createdOrder.payment.pixCopyPaste);
+    setCopiedPix(true);
+    toast.success("Código Pix copiado para a área de transferência!");
+    setTimeout(() => setCopiedPix(false), 3000);
+  };
+
   const handleCheckout = async () => {
     if (step === "cart") {
       setStep("shipping");
@@ -108,49 +209,37 @@ const Checkout = () => {
       }
       setStep("payment");
     } else if (step === "payment") {
+      if (!storeData?.id) {
+        toast.error("Loja não identificada. Recarregue a página.");
+        return;
+      }
       setIsProcessing(true);
       try {
-        // 1. Create order
-        // Generate a random UUID for the order client-side to associate items
-        const orderId = crypto.randomUUID();
-        
-        const { error: orderError } = await supabase
-          .from("orders")
-          .insert({
-            id: orderId,
-            store_id: storeData.id,
-            customer_name: formData.name,
-            customer_email: formData.email,
-            customer_phone: formData.phone,
-            shipping_address: `${formData.address}${formData.zip ? `, CEP: ${formData.zip}` : ""}`,
-            total_amount: total,
-            payment_method: paymentMethod,
-            status: "pending"
-          });
+        const orderResult = await createSecureOrder({
+          storeId: storeData.id,
+          customer: formData,
+          items: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+          couponCode: appliedCoupon?.code,
+          paymentMethod: paymentMethod,
+        });
 
-        if (orderError) throw orderError;
-
-        // 2. Create order items
-        const orderItems = items.map(item => ({
-          order_id: orderId,
-          product_id: item.product.id,
-          product_name: item.product.name,
-          quantity: item.quantity,
-          unit_price: item.product.price
-        }));
-
-        const { error: itemsError } = await supabase
-          .from("order_items")
-          .insert(orderItems);
-
-        if (itemsError) throw itemsError;
-
-        toast.success("Pedido realizado com sucesso!");
-        clearCart();
-        setStep("success");
+        if (orderResult.success) {
+          setCreatedOrder(orderResult);
+          clearCart();
+          if (paymentMethod === "pix" && orderResult.payment?.pixCopyPaste) {
+            setStep("pix_waiting");
+          } else {
+            setStep("success");
+          }
+        } else {
+          toast.error("Não foi possível processar seu pedido.");
+        }
       } catch (error: any) {
         console.error("Order error:", error);
-        toast.error("Erro ao processar o pedido. Tente novamente.");
+        toast.error(error.message || "Erro ao processar o pedido. Tente novamente.");
       } finally {
         setIsProcessing(false);
       }
@@ -168,12 +257,127 @@ const Checkout = () => {
           <div className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto">
             <ShieldCheck className="w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-heading font-bold" id="order-success-title">Pedido Confirmado!</h1>
-          <p className="text-muted-foreground">Obrigado por sua compra. Você receberá um e-mail com os detalhes do rastreio em breve.</p>
-          <Button className="w-full h-12 btn-premium" asChild>
-            <Link to={storeData?.slug ? `/store/${storeData.slug}` : "/"} id="success-home-link">Voltar para a Loja</Link>
-          </Button>
+          <h1 className="text-3xl font-heading font-bold" id="order-success-title">Pagamento Confirmado!</h1>
+          <p className="text-muted-foreground">
+            Seu pedido <span className="font-mono font-bold text-foreground">#{createdOrder?.orderId?.substring(0, 8)}</span> foi aprovado e já está sendo preparado pela loja.
+          </p>
+
+          <div className="space-y-3">
+            {orderWhatsAppLink && (
+              <a 
+                href={orderWhatsAppLink} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-colors"
+                id="whatsapp-order-success-btn"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span>Acompanhar Pedido pelo WhatsApp</span>
+              </a>
+            )}
+            <Button className="w-full h-12 btn-premium" asChild>
+              <Link to={storeData?.slug ? `/store/${storeData.slug}` : "/"} id="success-home-link">Voltar para a Loja</Link>
+            </Button>
+          </div>
         </motion.div>
+      </div>
+    );
+  }
+
+  if (step === "pix_waiting") {
+    const pixData = createdOrder?.payment;
+    const qrSrc = pixData?.pixQrCodeBase64
+      ? pixData.pixQrCodeBase64.startsWith("data:")
+        ? pixData.pixQrCodeBase64
+        : `data:image/png;base64,${pixData.pixQrCodeBase64}`
+      : null;
+
+    return (
+      <div className="min-h-screen bg-secondary/20 pb-20">
+        <header className="bg-background border-b h-16 flex items-center px-4 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+            <Link to={storeData?.slug ? `/store/${storeData.slug}` : "/"} className="flex items-center gap-2 font-heading font-bold uppercase tracking-tight">
+              <ShoppingBag className="w-5 h-5" />
+              Minha Loja
+            </Link>
+            <span className="text-xs font-bold text-primary">AGUARDANDO PAGAMENTO</span>
+          </div>
+        </header>
+
+        <main className="max-w-xl mx-auto px-4 py-8 space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass p-8 rounded-3xl space-y-6 text-center"
+          >
+            <div className="flex items-center justify-center gap-2 text-primary font-bold text-lg">
+              <QrCode className="w-6 h-6" />
+              <span>Pague com Pix</span>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              Abra o app do seu banco, escolha <strong>Pagar com Pix</strong> e aponte a câmera para o QR Code abaixo ou use o código Copia e Cola.
+            </p>
+
+            {qrSrc && (
+              <div className="bg-white p-4 rounded-2xl w-56 h-56 mx-auto flex items-center justify-center shadow-lg border">
+                <img src={qrSrc} alt="QR Code Pix" className="w-full h-full object-contain" id="pix-qr-image" />
+              </div>
+            )}
+
+            <div className="text-2xl font-bold text-foreground">
+              R$ {createdOrder?.totalAmount?.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+
+            {pixData?.pixCopyPaste && (
+              <div className="space-y-2 text-left">
+                <Label className="text-xs text-muted-foreground">Código Pix Copia e Cola:</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    readOnly 
+                    value={pixData.pixCopyPaste} 
+                    className="font-mono text-xs bg-secondary/50 select-all"
+                    id="pix-copy-paste-input"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleCopyPix}
+                    className="shrink-0 flex items-center gap-1.5"
+                    id="pix-copy-btn"
+                  >
+                    {copiedPix ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedPix ? "Copiado" : "Copiar"}</span>
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center justify-center gap-3 text-xs text-primary font-medium animate-pulse">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Aguardando confirmação do pagamento...</span>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              {orderWhatsAppLink && (
+                <a
+                  href={orderWhatsAppLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors shadow-sm"
+                  id="whatsapp-pix-contact-btn"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Falar no WhatsApp / Enviar Comprovante</span>
+                </a>
+              )}
+
+              <Button variant="ghost" className="w-full text-xs text-muted-foreground" asChild>
+                <Link to={storeData?.slug ? `/store/${storeData.slug}` : "/"}>Voltar para a loja e pagar depois</Link>
+              </Button>
+            </div>
+          </motion.div>
+        </main>
       </div>
     );
   }
@@ -190,7 +394,6 @@ const Checkout = () => {
             <span className={step === "cart" ? "text-primary" : ""}>CARRINHO</span>
             <span className="opacity-30">/</span>
             <span className={step === "shipping" ? "text-primary" : ""}>ENTREGA</span>
-            <span className="opacity-30">/</span>
             <span className={step === "payment" ? "text-primary" : ""}>PAGAMENTO</span>
           </div>
         </div>
@@ -257,12 +460,16 @@ const Checkout = () => {
                     <Input name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="seu@email.com" />
                   </div>
                   <div className="space-y-2">
-                    <Label>CEP</Label>
-                    <Input name="zip" value={formData.zip} onChange={handleInputChange} placeholder="00000-000" />
+                    <Label>CPF</Label>
+                    <Input name="cpf" value={formData.cpf} onChange={handleInputChange} placeholder="000.000.000-00" />
                   </div>
                   <div className="space-y-2">
                     <Label>Telefone</Label>
                     <Input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="(00) 00000-0000" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CEP</Label>
+                    <Input name="zip" value={formData.zip} onChange={handleInputChange} placeholder="00000-000" />
                   </div>
                   <div className="sm:col-span-2 space-y-2">
                     <Label>Endereço Completo *</Label>
@@ -282,31 +489,19 @@ const Checkout = () => {
               >
                 <h2 className="text-2xl font-heading font-bold">Forma de Pagamento</h2>
                 <RadioGroup 
-                  defaultValue="credit_card" 
+                  defaultValue="pix" 
                   value={paymentMethod}
                   onValueChange={setPaymentMethod}
                   className="grid gap-4"
                 >
                   <Label className="flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:bg-secondary/50">
                     <div className="flex items-center gap-4">
-                      <RadioGroupItem value="credit_card" />
-                      <div className="flex items-center gap-3">
-                        <CreditCard className="w-6 h-6 text-primary" />
-                        <div>
-                          <p className="font-bold">Cartão de Crédito</p>
-                          <p className="text-xs text-muted-foreground">Até 12x sem juros</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Label>
-                  <Label className="flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:bg-secondary/50">
-                    <div className="flex items-center gap-4">
                       <RadioGroupItem value="pix" />
                       <div className="flex items-center gap-3">
                         <QrCode className="w-6 h-6 text-primary" />
                         <div>
-                          <p className="font-bold">PIX</p>
-                          <p className="text-xs text-muted-foreground">Aprovação instantânea</p>
+                          <p className="font-bold">PIX (Mercado Pago)</p>
+                          <p className="text-xs text-muted-foreground">Aprovação instantânea e segura</p>
                         </div>
                       </div>
                     </div>
@@ -315,7 +510,7 @@ const Checkout = () => {
                 
                 <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex gap-3 text-sm">
                   <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-                  <p>Pagamento 100% seguro processado por nossa plataforma.</p>
+                  <p>Pagamento 100% seguro processado diretamente via Mercado Pago.</p>
                 </div>
               </motion.div>
             )}
@@ -374,9 +569,22 @@ const Checkout = () => {
               {isProcessing ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                step === "cart" ? "IR PARA ENTREGA" : step === "shipping" ? "IR PARA PAGAMENTO" : "FINALIZAR COMPRA"
+                step === "cart" ? "IR PARA ENTREGA" : step === "shipping" ? "IR PARA PAGAMENTO" : "GERAR PIX"
               )}
             </Button>
+
+            {cartWhatsAppLink && items.length > 0 && (
+              <a
+                href={cartWhatsAppLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full h-11 mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase tracking-wider transition-colors"
+                id="whatsapp-checkout-support-btn"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Finalizar ou Tirar Dúvidas no WhatsApp</span>
+              </a>
+            )}
             
             {step !== "cart" && (
               <Button 
@@ -387,7 +595,7 @@ const Checkout = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
-            ) }
+            )}
           </div>
         </div>
       </main>

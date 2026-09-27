@@ -17,13 +17,25 @@ const steps = [
 
 // templates.layout_key -> themeId do Theme Contract (PublicStore.tsx).
 const THEME_ID_BY_LAYOUT_KEY: Record<string, string> = {
-  "jo-perfumes": "jo-perfumes",
+  "base-theme": "base-theme",
+  "aura-maison": "aura-maison",
   premium: "aura-maison",
   "aurea-joalheria": "aurea-joalheria",
-  minimal: "aura-maison",
+  "jo-perfumes": "jo-perfumes",
+  "minimal-clean": "minimal-clean",
+  minimal: "minimal-clean",
 };
 
 export const DEFAULT_TEMPLATES = [
+  {
+    id: "44444444-0000-0000-0000-000000000004",
+    name: "Base Theme",
+    layout_key: "base-theme",
+    active: true,
+    description: "Tema clássico multi-propósito completo com sliders, banners informativos, instafeed e suporte a WhatsApp.",
+    thumbnail_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
+    preview_url: "/store/demo-base-theme",
+  },
   {
     id: "44444444-0000-0000-0000-000000000000",
     name: "Jô Perfumes & Cosméticos",
@@ -36,7 +48,7 @@ export const DEFAULT_TEMPLATES = [
   {
     id: "44444444-0000-0000-0000-000000000001",
     name: "Aura Maison",
-    layout_key: "premium",
+    layout_key: "aura-maison",
     active: true,
     description: "Tema oficial de luxo, com catálogo sofisticado, carrinho e favoritos adaptados aos seus produtos.",
     thumbnail_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
@@ -44,7 +56,7 @@ export const DEFAULT_TEMPLATES = [
   },
   {
     id: "44444444-0000-0000-0000-000000000002",
-    name: "Aurea Joalheria",
+    name: "Áurea Joalheria",
     layout_key: "aurea-joalheria",
     active: true,
     description: "Tema em tons de ônix e dourado com tipografia serifada de alta conversão.",
@@ -54,11 +66,11 @@ export const DEFAULT_TEMPLATES = [
   {
     id: "44444444-0000-0000-0000-000000000003",
     name: "Minimal Clean",
-    layout_key: "minimal",
+    layout_key: "minimal-clean",
     active: true,
     description: "Design moderno e minimalista com foco total na apresentação dos produtos.",
-    thumbnail_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&q=80",
-    preview_url: "/store/demo-minimal",
+    thumbnail_url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80",
+    preview_url: "/store/demo-minimal-clean",
   },
 ];
 
@@ -179,17 +191,19 @@ export default function Onboarding() {
       let orgId: string | null = null;
       try {
         const { data: orgData, error: orgError } = await supabase
-          .rpc("create_organization", { _name: formData.name })
-          .single();
+          .rpc("create_organization", { _name: formData.name });
 
-        if (!orgError && orgData?.id) {
-          orgId = orgData.id;
+        if (!orgError && orgData) {
+          const org = Array.isArray(orgData) ? orgData[0] : orgData;
+          orgId = org?.id || null;
+        } else if (orgError) {
+          console.warn("create_organization RPC error:", orgError);
         }
       } catch (e) {
-        console.warn("create_organization RPC fallback:", e);
+        console.warn("create_organization RPC catch:", e);
       }
 
-      // Se RPC falhar, tenta buscar organização em que o usuário seja membro
+      // Se RPC falhar, busca organização existente do usuário
       if (!orgId) {
         const { data: userOrgs } = await supabase
           .from("organization_members")
@@ -202,26 +216,22 @@ export default function Onboarding() {
         }
       }
 
-      let storePayload: any = {
+      if (!orgId) {
+        throw new Error("Não foi possível inicializar a organização da loja.");
+      }
+
+      const chosenTemplate = dbTemplates.find((t) => t.id === formData.templateId);
+      const activeTemplateId = chosenTemplate?.id || formData.templateId;
+
+      const storePayload = {
         owner_id: user.id,
-        name: formData.name,
-        slug: formData.slug,
+        organization_id: orgId,
+        name: formData.name.trim(),
+        slug: formData.slug.trim().toLowerCase(),
         category: formData.category as any,
+        active_template_id: activeTemplateId,
       };
 
-      if (orgId) {
-        storePayload.organization_id = orgId;
-      }
-
-      // Se templateId estiver no banco, inclui
-      const isRemoteTemplate = dbTemplates.some(
-        (t) => t.id === formData.templateId && t.id !== "44444444-0000-0000-0000-000000000001" && t.id !== "44444444-0000-0000-0000-000000000002" && t.id !== "44444444-0000-0000-0000-000000000003"
-      );
-      if (isRemoteTemplate) {
-        storePayload.active_template_id = formData.templateId;
-      }
-
-      let storeData: any = null;
       const { data: insertedStore, error: storeError } = await supabase
         .from("stores")
         .insert(storePayload)
@@ -229,21 +239,17 @@ export default function Onboarding() {
         .single();
 
       if (storeError) {
-        // Fallback se faltou organization_id ou active_template_id
-        delete storePayload.active_template_id;
-        const retry = await supabase.from("stores").insert(storePayload).select().single();
-        if (retry.error) throw retry.error;
-        storeData = retry.data;
-      } else {
-        storeData = insertedStore;
+        throw new Error(`Falha ao registrar loja: ${storeError.message}`);
       }
 
-      // Associar template à loja se aplicável
-      if (isRemoteTemplate && storeData?.id) {
+      const storeData = insertedStore;
+
+      // Associar template adquirido à loja
+      if (storeData?.id && activeTemplateId) {
         try {
           await supabase.from("store_templates").insert({
             store_id: storeData.id,
-            template_id: formData.templateId,
+            template_id: activeTemplateId,
             acquired_via: "onboarding",
           });
         } catch (e) {
@@ -251,15 +257,16 @@ export default function Onboarding() {
         }
       }
 
-      // Ativa o Theme Contract real
-      const chosenLayoutKey = dbTemplates.find((t) => t.id === formData.templateId)?.layout_key || "premium";
-      const themeId = chosenLayoutKey ? THEME_ID_BY_LAYOUT_KEY[chosenLayoutKey] || "aura-maison" : "aura-maison";
+      // Configura o Theme Contract da loja recém-criada
+      const chosenLayoutKey = chosenTemplate?.layout_key || "base-theme";
+      const themeId = THEME_ID_BY_LAYOUT_KEY[chosenLayoutKey] || chosenLayoutKey || "base-theme";
       try {
         await supabase
           .from("store_theme_configs")
-          .upsert({ store_id: storeData.id, config: { themeId } }, { onConflict: "store_id" });
+          .update({ config: { themeId } })
+          .eq("store_id", storeData.id);
       } catch (e) {
-        console.warn("store_theme_configs fallback:", e);
+        console.warn("store_theme_configs update non-blocking:", e);
       }
 
       toast.success("Loja criada com sucesso!");
@@ -459,20 +466,20 @@ export default function Onboarding() {
                           {/* Layout Features Badge */}
                           <div className="p-3 bg-background/50 backdrop-blur-sm border-t">
                             <div className="flex flex-wrap gap-1">
+                              {t.layout_key === 'base-theme' && ['Multi-propósito', 'Hero Slider', 'Instafeed'].map(tag => (
+                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/20">{tag}</span>
+                              ))}
                               {t.layout_key === 'jo-perfumes' && ['Stories Instagram', 'Social Commerce', 'Bio Perfil'].map(tag => (
                                 <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/20">{tag}</span>
                               ))}
-                              {t.layout_key === 'minimal' && ['Clean', 'Elegante', 'Minimalista'].map(tag => (
-                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">{tag}</span>
+                              {(t.layout_key === 'minimal-clean' || t.layout_key === 'minimal') && ['Clean', 'Elegante', 'Minimalista'].map(tag => (
+                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">{tag}</span>
                               ))}
-                              {t.layout_key === 'bold' && ['Vibrante', 'Moderno', 'Impactante'].map(tag => (
-                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">{tag}</span>
+                              {(t.layout_key === 'aura-maison' || t.layout_key === 'premium') && ['Luxo', 'Exclusivo', 'Editorial'].map(tag => (
+                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/20">{tag}</span>
                               ))}
-                              {t.layout_key === 'premium' && ['Luxo', 'Exclusivo', 'Premium'].map(tag => (
-                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">{tag}</span>
-                              ))}
-                              {t.layout_key === 'aurea-joalheria' && ['Elegante', 'Sofisticado', 'Refinado'].map(tag => (
-                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">{tag}</span>
+                              {t.layout_key === 'aurea-joalheria' && ['Joalheria', 'Ouro & Gemas', 'Refinado'].map(tag => (
+                                <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">{tag}</span>
                               ))}
                             </div>
                           </div>

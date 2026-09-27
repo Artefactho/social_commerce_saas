@@ -115,8 +115,12 @@ export const AureaJoalheriaStorefront: React.FC<AureaJoalheriaStorefrontProps> =
 
   return (
     <div
-      className="min-h-screen flex flex-col bg-[#050506] text-[#dedee6]"
-      style={{ fontFamily: "'Montserrat', sans-serif" }}
+      className="min-h-screen flex flex-col transition-colors duration-200"
+      style={{
+        backgroundColor: "var(--theme-background, #050506)",
+        color: "var(--theme-text, #dedee6)",
+        fontFamily: "var(--theme-font-body, 'Montserrat', sans-serif)",
+      }}
     >
       <style>{`
         .aurea-joalheria-root .font-heading { font-family: 'Cinzel', serif; }

@@ -159,7 +159,14 @@ export const JoPerfumesStorefront: React.FC<JoPerfumesStorefrontProps> = ({
     val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
-    <div className="min-h-screen bg-[#0d0d0f] text-zinc-100 font-sans selection:bg-rose-500 selection:text-white pb-20 md:pb-8">
+    <div 
+      className="min-h-screen selection:bg-rose-500 selection:text-white pb-20 md:pb-8 transition-colors duration-200"
+      style={{
+        backgroundColor: "var(--theme-background, #0d0d0f)",
+        color: "var(--theme-text, #f4f4f5)",
+        fontFamily: "var(--theme-font-body, 'Plus Jakarta Sans', sans-serif)",
+      }}
+    >
       {/* 1. Header do Social Commerce */}
       <header className="sticky top-0 z-40 bg-[#131316]/90 backdrop-blur-xl border-b border-white/10 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-16">

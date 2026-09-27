@@ -23,7 +23,14 @@ import {
   Layers,
   Upload,
   Image as ImageIcon,
-  X
+  X,
+  ArrowUp,
+  ArrowDown,
+  Sliders,
+  Video,
+  MessageCircle,
+  Sparkles,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +49,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ProductModal } from "@/components/ProductModal";
 import { DEFAULT_TEMPLATES } from "./Onboarding";
+import { VisualStoreEditor } from "@/features/theme/VisualStoreEditor";
+import { cancelOrder, refundOrder } from "@/services/order/OrderService";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -59,6 +68,7 @@ const Dashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -67,22 +77,14 @@ const Dashboard = () => {
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
   const [newCoupon, setNewCoupon] = useState({ code: "", discount_type: "percentage", discount_value: "" });
   const [isSavingCoupon, setIsSavingCoupon] = useState(false);
+  const [appearanceSubTab, setAppearanceSubTab] = useState<"themes" | "branding" | "sections">("themes");
   const [themeConfig, setThemeConfig] = useState<any>(null);
   const [isLoadingTheme, setIsLoadingTheme] = useState(false);
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
-  // Store Configuration (nome/logo/cor) — VISAO_E_MODELO_DE_NEGOCIO.md
-  // seção 6.4 / ROADMAP_DE_EXECUCAO.md Fase 4. `name`/`logo_url` moram em
-  // `stores` (usados por qualquer tema); as cores moram em
-  // `store_theme_configs.config.colors` (skills/theme-contract.md seção 3) — NÃO
-  // em `stores.primary_color`/`secondary_color`, que existem no schema
-  // legado do Lovable mas nunca foram consumidas por nenhum renderer, nem
-  // antes nem depois desta feature (ASSUMPTION: manter esses 2 campos
-  // como estão, sem migration, e não usá-los — evita reviver um segundo
-  // mecanismo de cor competindo com o Theme Contract; candidatos a
-  // limpeza numa migration futura). Cor de destaque hoje só é visível no
-  // tema Aura Maison (badges de contagem no Header); no renderer genérico
-  // de 3 layouts não há esse conceito — documentado no ROADMAP como
-  // limitação conhecida, não lacuna silenciosa.
+  const [storeSections, setStoreSections] = useState<any[]>([]);
+  const [isLoadingSections, setIsLoadingSections] = useState(false);
+  const [editingSection, setEditingSection] = useState<any | null>(null);
+  const [editSectionForm, setEditSectionForm] = useState<Record<string, any>>({});
   const [settingsName, setSettingsName] = useState("");
   const [settingsLogoFile, setSettingsLogoFile] = useState<File | null>(null);
   const [settingsLogoPreview, setSettingsLogoPreview] = useState<string | null>(null);
@@ -147,6 +149,50 @@ const Dashboard = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId: string) => {
+    if (!store?.id) return;
+    const confirmCancel = window.confirm("Deseja realmente cancelar este pedido pendente?");
+    if (!confirmCancel) return;
+
+    setProcessingOrderId(orderId);
+    try {
+      const res = await cancelOrder({ orderId, storeId: store.id });
+      if (res.success) {
+        toast.success(res.message || "Pedido cancelado com sucesso.");
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: "cancelled" } : o))
+        );
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao cancelar pedido.");
+    } finally {
+      setProcessingOrderId(null);
+    }
+  };
+
+  const handleRefundOrder = async (orderId: string) => {
+    if (!store?.id) return;
+    const confirmRefund = window.confirm(
+      "Deseja estornar e reembolsar este pedido integralmente via Mercado Pago?"
+    );
+    if (!confirmRefund) return;
+
+    setProcessingOrderId(orderId);
+    try {
+      const res = await refundOrder({ orderId, storeId: store.id });
+      if (res.success) {
+        toast.success(res.message || "Reembolso processado com sucesso!");
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: "cancelled" } : o))
+        );
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao processar estorno.");
+    } finally {
+      setProcessingOrderId(null);
+    }
+  };
+
   const fetchCategories = async (storeId: string) => {
     setIsLoadingCategories(true);
     try {
@@ -208,25 +254,165 @@ const Dashboard = () => {
     }
   };
 
-  const handleUpdateTheme = async (themeId: string | null) => {
-    const currentConfig = (themeConfig?.config as Record<string, any>) || {};
-    if (currentConfig.themeId === themeId) return;
+  const handleActivateTheme = async (themeKey: string) => {
+    const currentThemeId = themeConfig?.config?.themeId ?? "base-theme";
+    // Mapear layout_key ou id para o template do banco
+    const matchingTemplate = dbTemplates.find(
+      (t) =>
+        t.layout_key === themeKey ||
+        (themeKey === "aura-maison" && (t.layout_key === "premium" || t.layout_key === "aura-maison")) ||
+        (themeKey === "minimal-clean" && (t.layout_key === "minimal" || t.layout_key === "minimal-clean")) ||
+        t.id === themeKey
+    );
+    const templateId = matchingTemplate?.id || store.active_template_id;
+
+    if (currentThemeId === themeKey && store.active_template_id === templateId) return;
 
     setIsUpdatingTheme(true);
     try {
-      const newConfig = { ...currentConfig, themeId };
-      const { error } = await supabase
+      // 1. Sincronizar active_template_id na tabela stores
+      if (templateId) {
+        const { error: storeError } = await supabase
+          .from("stores")
+          .update({ active_template_id: templateId })
+          .eq("id", store.id);
+        if (storeError) throw storeError;
+      }
+
+      // 2. Sincronizar themeId no store_theme_configs.config
+      const currentConfig = (themeConfig?.config as Record<string, any>) || {};
+      const newConfig = { ...currentConfig, themeId: themeKey };
+      const { error: configError } = await supabase
         .from("store_theme_configs")
         .update({ config: newConfig })
         .eq("store_id", store.id);
 
-      if (error) throw error;
+      if (configError) {
+        await supabase
+          .from("store_theme_configs")
+          .upsert({ store_id: store.id, config: newConfig }, { onConflict: "store_id" });
+      }
+
+      setStore((prev: any) => ({ ...prev, active_template_id: templateId }));
       setThemeConfig((prev: any) => ({ ...prev, config: newConfig }));
-      toast.success("Tema atualizado com sucesso!");
+      toast.success("Tema ativado com sucesso!");
     } catch (error: any) {
-      toast.error("Erro ao atualizar o tema: " + error.message);
+      console.error("Erro ao ativar tema:", error);
+      toast.error("Erro ao ativar o tema: " + (error.message || "Erro desconhecido"));
     } finally {
       setIsUpdatingTheme(false);
+    }
+  };
+
+  const DEFAULT_SECTIONS_SEED = [
+    { section_type: "hero_slider", enabled: true, position: 10, settings: { title: "Destaques & Ofertas", subtitle: "Coleção Exclusiva", buttonText: "Ver Produtos" } },
+    { section_type: "benefits_bar", enabled: true, position: 20, settings: {} },
+    { section_type: "video_feature", enabled: true, position: 30, settings: { title: "Conheça Nossos Produtos", subtitle: "Vídeo em Alta Definição", description: "Assista aos detalhes e conheça nossa qualidade." } },
+    { section_type: "social_feed", enabled: true, position: 40, settings: { title: "Siga no Instagram", subtitle: "Comunidade Oficial" } },
+    { section_type: "whatsapp_cta", enabled: true, position: 50, settings: {} },
+    { section_type: "newsletter", enabled: true, position: 60, settings: { title: "Receba Novidades Exclusivas", badge: "Newsletter" } },
+  ];
+
+  const fetchStoreSections = async (storeId: string) => {
+    setIsLoadingSections(true);
+    try {
+      const { data, error } = await supabase
+        .from("store_sections")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("position", { ascending: true });
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setStoreSections(data);
+      } else {
+        const seeds = DEFAULT_SECTIONS_SEED.map((s) => ({
+          store_id: storeId,
+          section_type: s.section_type,
+          enabled: s.enabled,
+          position: s.position,
+          settings: s.settings,
+        }));
+        const { data: inserted, error: insertError } = await supabase
+          .from("store_sections")
+          .insert(seeds)
+          .select("*")
+          .order("position", { ascending: true });
+        if (!insertError && inserted) {
+          setStoreSections(inserted);
+        } else {
+          setStoreSections(seeds);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error fetching store sections:", error);
+    } finally {
+      setIsLoadingSections(false);
+    }
+  };
+
+  const handleToggleSection = async (section: any) => {
+    const newEnabled = !section.enabled;
+    const updated = storeSections.map((s) => (s.id === section.id ? { ...s, enabled: newEnabled } : s));
+    setStoreSections(updated);
+    try {
+      if (section.id) {
+        await supabase.from("store_sections").update({ enabled: newEnabled }).eq("id", section.id);
+        toast.success(newEnabled ? "Seção ativada!" : "Seção desativada!");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao atualizar seção");
+    }
+  };
+
+  const handleMoveSection = async (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === storeSections.length - 1) return;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const newSections = [...storeSections];
+    const temp = newSections[index];
+    newSections[index] = newSections[targetIndex];
+    newSections[targetIndex] = temp;
+
+    const reordered = newSections.map((sec, idx) => ({
+      ...sec,
+      position: (idx + 1) * 10,
+    }));
+
+    setStoreSections(reordered);
+
+    try {
+      for (const sec of reordered) {
+        if (sec.id) {
+          await supabase.from("store_sections").update({ position: sec.position }).eq("id", sec.id);
+        }
+      }
+      toast.success("Ordem das seções atualizada!");
+    } catch (err) {
+      toast.error("Erro ao salvar nova ordem");
+    }
+  };
+
+  const handleOpenEditSection = (section: any) => {
+    setEditingSection(section);
+    setEditSectionForm(section.settings || {});
+  };
+
+  const handleSaveSectionSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSection) return;
+
+    const updated = storeSections.map((s) => (s.id === editingSection.id ? { ...s, settings: editSectionForm } : s));
+    setStoreSections(updated);
+    try {
+      if (editingSection.id) {
+        await supabase.from("store_sections").update({ settings: editSectionForm }).eq("id", editingSection.id);
+        toast.success("Configurações da seção salvas com sucesso!");
+      }
+      setEditingSection(null);
+    } catch (err: any) {
+      toast.error("Erro ao salvar configurações da seção: " + err.message);
     }
   };
 
@@ -363,6 +549,7 @@ const Dashboard = () => {
         fetchCategories(data.id);
         fetchCoupons(data.id);
         fetchThemeConfig(data.id);
+        fetchStoreSections(data.id);
       }
       setIsLoading(false);
     };
@@ -397,24 +584,9 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleUpdateTemplate = async (templateId: string) => {
-    if (templateId === store.active_template_id) return;
-    
-    setIsUpdatingTemplate(true);
-    try {
-      const { error } = await supabase
-        .from("stores")
-        .update({ active_template_id: templateId })
-        .eq("id", store.id);
-      
-      if (error) throw error;
-      
-      setStore(prev => ({ ...prev, active_template_id: templateId }));
-      toast.success("Template atualizado com sucesso!");
-    } catch (error: any) {
-      toast.error("Erro ao atualizar template");
-    } finally {
-      setIsUpdatingTemplate(false);
-    }
+    const chosen = dbTemplates.find((t) => t.id === templateId);
+    const chosenLayoutKey = chosen?.layout_key || "base-theme";
+    await handleActivateTheme(chosenLayoutKey);
   };
 
   const handleUpdatePlan = async (plan: any) => {
@@ -617,22 +789,24 @@ const Dashboard = () => {
             { id: "orders", label: "Pedidos", icon: ShoppingCart },
             { id: "plans", label: "Assinatura", icon: DollarSign },
             { id: "appearance", label: "Aparência", icon: Palette },
-            { id: "theme", label: "Tema", icon: Layers },
             { id: "settings", label: "Configurações", icon: Settings },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                activeTab === item.id 
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                  : "hover:bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              {item.label}
-            </button>
-          ))}
+          ].map((item) => {
+            const isActive = activeTab === item.id || (item.id === "appearance" && activeTab === "theme");
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  isActive 
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                    : "hover:bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t space-y-2">
@@ -862,7 +1036,7 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          {activeTab === "appearance" && (
+          {(activeTab === "appearance" || activeTab === "theme") && (
             <motion.div
               key="appearance"
               initial={{ opacity: 0, y: 20 }}
@@ -870,133 +1044,386 @@ const Dashboard = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              <div className="flex items-center justify-between">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-heading font-bold">Personalização Visual</h2>
-                  <p className="text-muted-foreground text-sm">Escolha como sua loja é apresentada ao mundo.</p>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6">
-                {dbTemplates.map((t) => (
-                  <Card 
-                    key={t.id}
-                    className={`overflow-hidden transition-all duration-300 ${
-                      store.active_template_id === t.id 
-                        ? "ring-2 ring-primary shadow-xl" 
-                        : "hover:shadow-lg opacity-80 hover:opacity-100"
-                    }`}
-                  >
-                    <div className="aspect-[4/5] relative group">
-                      <img 
-                        src={t.thumbnail_url} 
-                        alt={t.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-6 text-center text-white">
-                        <p className="text-sm mb-4 line-clamp-3">{t.description}</p>
-                        <Button 
-                          variant="secondary" 
-                          size="sm"
-                          className="w-full mb-2"
-                          onClick={() => window.open(t.preview_url, '_blank')}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          Ver Demo
-                        </Button>
-                        {store.active_template_id !== t.id && (
-                          <Button 
-                            className="w-full"
-                            onClick={() => handleUpdateTemplate(t.id)}
-                            disabled={isUpdatingTemplate}
-                          >
-                            {isUpdatingTemplate ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ativar Template"}
-                          </Button>
-                        )}
-                      </div>
-                      
-                      {store.active_template_id === t.id && (
-                        <div className="absolute top-4 right-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-2">
-                          <Check className="w-3 h-3" />
-                          Ativo
-                        </div>
-                      )}
-                    </div>
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-lg">{t.name}</CardTitle>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === "theme" && (
-            <motion.div
-              key="theme"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-8"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-heading font-bold">Tema da Loja</h2>
+                  <h2 className="text-2xl font-heading font-bold">Personalização & Aparência</h2>
                   <p className="text-muted-foreground text-sm">
-                    Escolha o tema oficial usado na vitrine pública da sua loja.
+                    Escolha o tema, personalize a identidade visual e configure as seções da sua vitrine pública.
                   </p>
                 </div>
                 {store?.slug && (
-                  <Button variant="outline" size="sm" onClick={() => window.open(`/store/${store.slug}`, "_blank")}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Ver minha loja
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={`/store/${store.slug}`} target="_blank" rel="noreferrer">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Ver Minha Loja
+                    </a>
                   </Button>
                 )}
               </div>
 
-              {isLoadingTheme ? (
-                <div className="h-32 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              {/* Sub-Navigation Tabs */}
+              <div className="flex border-b border-border gap-2 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setAppearanceSubTab("themes")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                    appearanceSubTab === "themes"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                  }`}
+                >
+                  <Layers className="w-4 h-4" />
+                  Tema
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAppearanceSubTab("branding")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                    appearanceSubTab === "branding"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                  }`}
+                >
+                  <Palette className="w-4 h-4" />
+                  Personalizar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAppearanceSubTab("sections")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                    appearanceSubTab === "sections"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                  }`}
+                >
+                  <Sliders className="w-4 h-4" />
+                  Seções
+                </button>
+              </div>
+
+              {/* SUB-TAB 1: TEMA (5 Temas Oficiais) */}
+              {appearanceSubTab === "themes" && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-heading font-bold">5 Temas Oficiais do Sistema</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Escolha o estilo visual da sua loja. O tema selecionado se aplica imediatamente à sua vitrine pública.
+                    </p>
+                  </div>
+
+                  {isLoadingTheme ? (
+                    <div className="h-32 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[
+                        { 
+                          id: "base-theme", 
+                          name: "Base Theme", 
+                          tag: "Nuvemshop Base",
+                          description: "Tema clássico e multi-propósito com sliders, banners informativos, instafeed, vídeo e QuickShop.",
+                          preview: "/store/demo-base-theme"
+                        },
+                        { 
+                          id: "aura-maison", 
+                          name: "Aura Maison", 
+                          tag: "Alta Moda & Luxo",
+                          description: "Tema oficial de alta costura e moda com catálogo sofisticado, cores customizáveis e carrinho premium.",
+                          preview: "/store/demo-aura-maison"
+                        },
+                        { 
+                          id: "aurea-joalheria", 
+                          name: "Áurea Joalheria", 
+                          tag: "Joalheria & Gemas",
+                          description: "Tema em tons de ônix e ouro 18k com tipografia serifada de alta conversão para joias e relógios.",
+                          preview: "/store/demo-aurea-joalheria"
+                        },
+                        { 
+                          id: "jo-perfumes", 
+                          name: "Jô Perfumes & Cosméticos", 
+                          tag: "Social Commerce & Stories",
+                          description: "Tema estilo Instagram Shop com stories em destaque, perfil verificado e navegação mobile otimizada.",
+                          preview: "/store/demo-jo-perfumes"
+                        },
+                        { 
+                          id: "minimal-clean", 
+                          name: "Minimal Clean", 
+                          tag: "Design Nórdico",
+                          description: "Design moderno e minimalista com foco total na apresentação dos produtos e conversão limpa.",
+                          preview: "/store/demo-minimal-clean"
+                        },
+                      ].map((option) => {
+                        const currentThemeId = themeConfig?.config?.themeId ?? "base-theme";
+                        const isActive = currentThemeId === option.id;
+                        return (
+                          <Card
+                            key={option.id}
+                            className={`transition-all duration-300 flex flex-col justify-between ${
+                              isActive ? "ring-2 ring-primary shadow-xl bg-card" : "hover:shadow-lg opacity-85 hover:opacity-100"
+                            }`}
+                          >
+                            <CardHeader className="p-6">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                                  {option.tag}
+                                </span>
+                                {isActive && (
+                                  <span className="bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                                    <Check className="w-3 h-3" />
+                                    Ativo
+                                  </span>
+                                )}
+                              </div>
+                              <CardTitle className="text-xl font-bold">{option.name}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="px-6 pb-6 space-y-4 flex-1 flex flex-col justify-between">
+                              <p className="text-sm text-muted-foreground">{option.description}</p>
+                              <div className="space-y-2 pt-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full"
+                                  onClick={() => window.open(option.preview, "_blank")}
+                                >
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Ver Demonstração
+                                </Button>
+                                {isActive ? (
+                                  <Button className="w-full bg-emerald-600 hover:bg-emerald-600 text-white cursor-default" disabled>
+                                    <Check className="w-4 h-4 mr-2" />
+                                    Tema Ativo
+                                  </Button>
+                                ) : (
+                                  <Button className="w-full btn-premium" onClick={() => handleActivateTheme(option.id)} disabled={isUpdatingTheme}>
+                                    {isUpdatingTheme ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ativar Tema"}
+                                  </Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  {[
-                    { id: null as string | null, name: "Padrão", description: "Layout genérico (minimal, bold ou premium — definido na aba Aparência)." },
-                    { id: "jo-perfumes", name: "Jô Perfumes & Cosméticos", description: "Tema exclusivo para perfumaria e cosméticos, com stories, carrossel dinâmico e catálogo refinado." },
-                    { id: "aura-maison", name: "Aura Maison", description: "Tema oficial de moda e luxo com catálogo sofisticado, carrinho e favoritos adaptados." },
-                    { id: "aurea-joalheria", name: "Aurea Joalheria", description: "Tema em tons de ônix e dourado, com tipografia serifada para joalherias e acessórios de alto padrão." },
-                  ].map((option) => {
-                    const currentThemeId = themeConfig?.config?.themeId ?? null;
-                    const isActive = currentThemeId === option.id;
-                    return (
-                      <Card
-                        key={option.name}
-                        className={`transition-all duration-300 ${
-                          isActive ? "ring-2 ring-primary shadow-xl" : "hover:shadow-lg opacity-80 hover:opacity-100"
-                        }`}
-                      >
-                        <CardHeader className="p-6">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">{option.name}</CardTitle>
-                            {isActive && (
-                              <span className="bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-2">
-                                <Check className="w-3 h-3" />
-                                Ativo
-                              </span>
-                            )}
+              )}
+
+              {/* SUB-TAB 2: PERSONALIZAR / VISUAL CUSTOMIZER V2 */}
+              {appearanceSubTab === "branding" && (
+                <VisualStoreEditor
+                  store={store}
+                  themeConfig={themeConfig}
+                  storeSections={storeSections}
+                  products={products}
+                  categories={categories}
+                  onSaveSuccess={(updatedStore, updatedConfig) => {
+                    setStore((prev: any) => ({ ...prev, ...updatedStore }));
+                    setThemeConfig(updatedConfig);
+                    setSettingsName(updatedStore.name);
+                    if (updatedStore.logo_url) {
+                      setSettingsLogoPreview(updatedStore.logo_url);
+                    }
+                  }}
+                />
+              )}
+
+              {/* SUB-TAB 3: SEÇÕES DA HOME */}
+              {appearanceSubTab === "sections" && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-heading font-bold">Seções da Página Inicial</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Escolha o que aparece na página da sua loja e em qual ordem (Section Engine).
+                    </p>
+                  </div>
+
+                  {isLoadingSections ? (
+                    <div className="h-32 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {storeSections.map((sec, idx) => {
+                        const sectionNames: Record<string, { label: string; desc: string; icon: any }> = {
+                          hero_slider: { label: "Banner Hero Principal", desc: "Destaque visual de topo com títulos e botão de chamada.", icon: Sparkles },
+                          benefits_bar: { label: "Barra de Vantagens & Benefícios", desc: "Ícones de frete grátis, parcelamento, segurança e suporte.", icon: ShieldCheck },
+                          video_feature: { label: "Seção de Vídeo em Destaque", desc: "Player em alta definição com capa e reprodução imersiva.", icon: Video },
+                          social_feed: { label: "Feed Social / Instagram", desc: "Grade de fotos e engajamento da sua comunidade.", icon: ImageIcon },
+                          whatsapp_cta: { label: "Chamada para o WhatsApp", desc: "Botão direto para atendimento e fechamento de vendas.", icon: MessageCircle },
+                          newsletter: { label: "Captura de Newsletter", desc: "Formulário de cadastro para cupons e novidades.", icon: Ticket },
+                          categories_carousel: { label: "Carrossel de Categorias", desc: "Navegação rápida pelos departamentos da loja.", icon: Tag },
+                          featured_products: { label: "Grade de Produtos em Destaque", desc: "Exibição do catálogo principal.", icon: Package },
+                        };
+
+                        const info = sectionNames[sec.section_type] || {
+                          label: sec.section_type,
+                          desc: "Seção dinâmica da loja.",
+                          icon: Sliders,
+                        };
+                        const IconComponent = info.icon;
+
+                        return (
+                          <div
+                            key={sec.id || idx}
+                            className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                              sec.enabled ? "bg-card border-border shadow-sm" : "bg-muted/40 border-muted opacity-60"
+                            }`}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <IconComponent className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-sm">{info.label}</h4>
+                                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                                    sec.enabled ? "bg-emerald-500/10 text-emerald-600" : "bg-gray-500/10 text-gray-500"
+                                  }`}>
+                                    {sec.enabled ? "Ativa" : "Oculta"}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{info.desc}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveSection(idx, "up")}
+                                title="Mover para cima"
+                              >
+                                <ArrowUp className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                disabled={idx === storeSections.length - 1}
+                                onClick={() => handleMoveSection(idx, "down")}
+                                title="Mover para baixo"
+                              >
+                                <ArrowDown className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs font-semibold"
+                                onClick={() => handleOpenEditSection(sec)}
+                              >
+                                <Edit className="w-3.5 h-3.5 mr-1.5" />
+                                Configurar
+                              </Button>
+                              <Button
+                                variant={sec.enabled ? "default" : "secondary"}
+                                size="sm"
+                                className="h-8 text-xs font-bold"
+                                onClick={() => handleToggleSection(sec)}
+                              >
+                                {sec.enabled ? "Desativar" : "Ativar"}
+                              </Button>
+                            </div>
                           </div>
-                        </CardHeader>
-                        <CardContent className="px-6 pb-6 space-y-4">
-                          <p className="text-sm text-muted-foreground">{option.description}</p>
-                          {!isActive && (
-                            <Button className="w-full" onClick={() => handleUpdateTheme(option.id)} disabled={isUpdatingTheme}>
-                              {isUpdatingTheme ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ativar Tema"}
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Edit Section Modal */}
+              {editingSection && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-background border rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-6"
+                  >
+                    <div className="flex items-center justify-between border-b pb-4">
+                      <div>
+                        <h3 className="font-heading font-bold text-lg">Configurar Seção</h3>
+                        <p className="text-xs text-muted-foreground">Personalize os textos e links exibidos.</p>
+                      </div>
+                      <button onClick={() => setEditingSection(null)} className="p-1.5 rounded-full hover:bg-secondary">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleSaveSectionSettings} className="space-y-4 text-sm">
+                      <div className="space-y-1.5">
+                        <Label>Título Principal</Label>
+                        <Input
+                          value={editSectionForm.title || ""}
+                          onChange={(e) => setEditSectionForm({ ...editSectionForm, title: e.target.value })}
+                          placeholder="Ex: Destaques & Ofertas"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label>Subtítulo / Badge</Label>
+                        <Input
+                          value={editSectionForm.subtitle || editSectionForm.badge || ""}
+                          onChange={(e) => setEditSectionForm({ ...editSectionForm, subtitle: e.target.value, badge: e.target.value })}
+                          placeholder="Ex: Coleção Exclusiva"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label>Descrição</Label>
+                        <Input
+                          value={editSectionForm.description || ""}
+                          onChange={(e) => setEditSectionForm({ ...editSectionForm, description: e.target.value })}
+                          placeholder="Breve descrição da seção"
+                        />
+                      </div>
+
+                      {editingSection.section_type === "hero_slider" && (
+                        <div className="space-y-1.5">
+                          <Label>Texto do Botão</Label>
+                          <Input
+                            value={editSectionForm.buttonText || ""}
+                            onChange={(e) => setEditSectionForm({ ...editSectionForm, buttonText: e.target.value })}
+                            placeholder="Ex: VER PRODUTOS"
+                          />
+                        </div>
+                      )}
+
+                      {editingSection.section_type === "video_feature" && (
+                        <div className="space-y-1.5">
+                          <Label>URL do Vídeo (MP4 ou link direto)</Label>
+                          <Input
+                            value={editSectionForm.videoUrl || ""}
+                            onChange={(e) => setEditSectionForm({ ...editSectionForm, videoUrl: e.target.value })}
+                            placeholder="https://..."
+                          />
+                        </div>
+                      )}
+
+                      {editingSection.section_type === "social_feed" && (
+                        <div className="space-y-1.5">
+                          <Label>Usuário do Instagram (@)</Label>
+                          <Input
+                            value={editSectionForm.handle || ""}
+                            onChange={(e) => setEditSectionForm({ ...editSectionForm, handle: e.target.value })}
+                            placeholder="@sualoja"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t">
+                        <Button type="button" variant="outline" onClick={() => setEditingSection(null)}>
+                          Cancelar
+                        </Button>
+                        <Button type="submit" className="btn-premium">
+                          Salvar Alterações
+                        </Button>
+                      </div>
+                    </form>
+                  </motion.div>
                 </div>
               )}
             </motion.div>
@@ -1138,6 +1565,7 @@ const Dashboard = () => {
                           <th className="pb-4 font-medium">Total</th>
                           <th className="pb-4 font-medium">Status</th>
                           <th className="pb-4 font-medium">Pagamento</th>
+                          <th className="pb-4 font-medium text-right">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y">
@@ -1153,26 +1581,65 @@ const Dashboard = () => {
                             <td className="py-4 font-medium">R$ {Number(order.total_amount).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td className="py-4">
                               <span className={`inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                                order.status === "pending" ? "bg-yellow-500/10 text-yellow-600" : "bg-green-500/10 text-green-500"
+                                order.status === "pending"
+                                  ? "bg-yellow-500/10 text-yellow-600"
+                                  : order.status === "paid"
+                                  ? "bg-green-500/10 text-green-500"
+                                  : "bg-red-500/10 text-red-500"
                               }`}>
-                                {order.status === "pending" ? "Pendente" : "Pago"}
+                                {order.status === "pending" ? "Pendente" : order.status === "paid" ? "Pago" : "Cancelado"}
                               </span>
                             </td>
                             <td className="py-4 text-sm text-muted-foreground capitalize">
                               {order.payment_method?.replace("_", " ") || "N/A"}
                             </td>
+                            <td className="py-4 text-right">
+                              {order.status === "pending" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 text-xs text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                                  onClick={() => handleCancelOrder(order.id)}
+                                  disabled={processingOrderId === order.id}
+                                  id={`cancel-order-btn-${order.id}`}
+                                >
+                                  {processingOrderId === order.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                                  ) : null}
+                                  Cancelar
+                                </Button>
+                              )}
+                              {order.status === "paid" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 text-xs text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+                                  onClick={() => handleRefundOrder(order.id)}
+                                  disabled={processingOrderId === order.id}
+                                  id={`refund-order-btn-${order.id}`}
+                                >
+                                  {processingOrderId === order.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                                  ) : null}
+                                  Estornar / Reembolsar
+                                </Button>
+                              )}
+                              {order.status === "cancelled" && (
+                                <span className="text-xs text-muted-foreground italic">Encerrado</span>
+                              )}
+                            </td>
                           </tr>
                         ))}
                         {!isLoadingOrders && orders.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                            <td colSpan={6} className="py-8 text-center text-muted-foreground">
                               Nenhum pedido recebido ainda.
                             </td>
                           </tr>
                         )}
                         {isLoadingOrders && (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center">
+                            <td colSpan={6} className="py-8 text-center">
                               <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
                             </td>
                           </tr>
