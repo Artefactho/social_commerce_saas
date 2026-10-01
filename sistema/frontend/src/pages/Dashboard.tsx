@@ -30,7 +30,13 @@ import {
   Video,
   MessageCircle,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  CreditCard,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  Zap,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +57,7 @@ import { ProductModal } from "@/components/ProductModal";
 import { DEFAULT_TEMPLATES } from "./Onboarding";
 import { VisualStoreEditor } from "@/features/theme/VisualStoreEditor";
 import { cancelOrder, refundOrder } from "@/services/order/OrderService";
+import { activePaymentService, StorePaymentConnectionStatus } from "@/services/payment/PaymentProvider";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -60,6 +67,9 @@ const Dashboard = () => {
   const [dbTemplates, setDbTemplates] = useState<any[]>(DEFAULT_TEMPLATES);
   const [plans, setPlans] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+  const [paymentStatus, setPaymentStatus] = useState<StorePaymentConnectionStatus | null>(null);
+  const [isLoadingPaymentStatus, setIsLoadingPaymentStatus] = useState(false);
+  const [isConnectingPayment, setIsConnectingPayment] = useState(false);
   const [isUpdatingTemplate, setIsUpdatingTemplate] = useState(false);
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -550,6 +560,7 @@ const Dashboard = () => {
         fetchCoupons(data.id);
         fetchThemeConfig(data.id);
         fetchStoreSections(data.id);
+        fetchPaymentStatus(data.id);
       }
       setIsLoading(false);
     };
@@ -582,6 +593,64 @@ const Dashboard = () => {
     fetchTemplates();
     fetchPlans();
   }, [navigate]);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const mpSuccess = searchParams.get("mp_success");
+    const mpError = searchParams.get("mp_error");
+
+    if (tabParam === "payments" || mpSuccess || mpError) {
+      setActiveTab("payments");
+    }
+
+    if (mpSuccess === "connected") {
+      toast.success("Mercado Pago conectado com sucesso!");
+    } else if (mpError) {
+      const errorMap: Record<string, string> = {
+        invalid_state: "Sessão de autorização expirada ou inválida. Tente novamente.",
+        token_exchange_failed: "Falha na troca de permissões com o Mercado Pago.",
+        db_save_failed: "Falha ao salvar a conexão no banco de dados.",
+        server_error: "Erro no servidor durante a autenticação.",
+        missing_params: "Parâmetros de autorização ausentes.",
+      };
+      toast.error(errorMap[mpError] || `Erro ao conectar com Mercado Pago: ${mpError}`);
+    }
+  }, [searchParams]);
+
+  const fetchPaymentStatus = async (storeId: string) => {
+    setIsLoadingPaymentStatus(true);
+    try {
+      const status = await activePaymentService.getStoreConnectionStatus(storeId);
+      setPaymentStatus(status);
+    } catch (error: any) {
+      console.error("Error fetching payment status:", error);
+    } finally {
+      setIsLoadingPaymentStatus(false);
+    }
+  };
+
+  const handleConnectMercadoPago = async () => {
+    if (!store?.id || isConnectingPayment) return;
+    setIsConnectingPayment(true);
+    try {
+      const result = await activePaymentService.connectMercadoPago(store.id);
+      if (result?.url) {
+        window.location.href = result.url;
+      } else {
+        throw new Error("URL de autorização não retornada pelo servidor.");
+      }
+    } catch (error: any) {
+      console.error("Erro ao iniciar OAuth do Mercado Pago:", error);
+      toast.error(error.message || "Falha ao conectar com o Mercado Pago. Tente novamente.");
+      setIsConnectingPayment(false);
+    }
+  };
+
+  const handleRefreshPaymentStatus = async () => {
+    if (!store?.id) return;
+    await fetchPaymentStatus(store.id);
+    toast.success("Status de pagamento atualizado!");
+  };
 
   const handleUpdateTemplate = async (templateId: string) => {
     const chosen = dbTemplates.find((t) => t.id === templateId);
@@ -787,6 +856,7 @@ const Dashboard = () => {
             { id: "categories", label: "Categorias", icon: Tag },
             { id: "coupons", label: "Cupons", icon: Ticket },
             { id: "orders", label: "Pedidos", icon: ShoppingCart },
+            { id: "payments", label: "Pagamentos", icon: CreditCard },
             { id: "plans", label: "Assinatura", icon: DollarSign },
             { id: "appearance", label: "Aparência", icon: Palette },
             { id: "settings", label: "Configurações", icon: Settings },
@@ -1802,7 +1872,176 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          {activeTab !== "overview" && activeTab !== "appearance" && activeTab !== "theme" && activeTab !== "settings" && activeTab !== "orders" && activeTab !== "categories" && activeTab !== "coupons" && activeTab !== "plans" && (
+          {activeTab === "payments" && (
+            <motion.div
+              key="payments"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-8 max-w-4xl"
+            >
+              <div>
+                <h2 className="text-2xl font-heading font-bold">Meios de Pagamento</h2>
+                <p className="text-muted-foreground text-sm">
+                  Configure o gateway de pagamentos da sua loja para receber diretamente via Pix.
+                </p>
+              </div>
+
+              {/* Status Card */}
+              {isLoadingPaymentStatus ? (
+                <Card className="glass p-12 text-center flex flex-col items-center justify-center space-y-4">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm font-medium text-muted-foreground">Verificando conexão com o Mercado Pago...</p>
+                </Card>
+              ) : paymentStatus?.connected ? (
+                <Card className="glass border-emerald-500/30 overflow-hidden shadow-lg shadow-emerald-500/5">
+                  <div className="bg-emerald-500/10 border-b border-emerald-500/20 px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                        Mercado Pago Conectado
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300">
+                      Ativo
+                    </span>
+                  </div>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Provedor</Label>
+                        <p className="font-bold text-lg text-foreground">Mercado Pago (Pix)</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Status da Conexão</Label>
+                        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          Pronto para receber pagamentos
+                        </p>
+                      </div>
+                      {paymentStatus.providerUserId && (
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">ID da Conta no Gateway</Label>
+                          <p className="font-mono text-xs text-muted-foreground bg-secondary/50 px-2.5 py-1.5 rounded-lg inline-block">
+                            {paymentStatus.providerUserId}
+                          </p>
+                        </div>
+                      )}
+                      {paymentStatus.updatedAt && (
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Última Sincronização</Label>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(paymentStatus.updatedAt).toLocaleString("pt-BR")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Shield className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>Chaves e credenciais seguras protegidas no servidor.</span>
+                      </div>
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRefreshPaymentStatus}
+                          disabled={isLoadingPaymentStatus}
+                          id="refresh-payment-status-btn"
+                          className="w-full sm:w-auto"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoadingPaymentStatus ? "animate-spin" : ""}`} />
+                          Atualizar Status
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleConnectMercadoPago}
+                          disabled={isConnectingPayment}
+                          id="reconnect-mercadopago-btn"
+                          className="w-full sm:w-auto"
+                        >
+                          {isConnectingPayment ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : null}
+                          Reconectar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="glass border-border overflow-hidden">
+                  <div className="bg-secondary/40 border-b px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-amber-500" />
+                      <span className="font-bold text-sm">Mercado Pago não conectado</span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      Não Conectado
+                    </span>
+                  </div>
+                  <CardContent className="p-8 space-y-6">
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-heading font-bold">Receba pagamentos instantâneos via Pix</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Conecte a sua conta do Mercado Pago para que os seus clientes possam pagar via Pix no checkout da sua loja. O valor cai diretamente na sua conta e os pedidos são aprovados de forma automática.
+                      </p>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-4 py-2">
+                      <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50 space-y-1">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-2">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        <p className="font-bold text-xs">Pix Automático</p>
+                        <p className="text-[11px] text-muted-foreground">QR Code e chave Copia e Cola gerados na hora.</p>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50 space-y-1">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-2">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                        <p className="font-bold text-xs">Baixa Imediata</p>
+                        <p className="text-[11px] text-muted-foreground">O status do pedido muda para Pago em segundos.</p>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50 space-y-1">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-2">
+                          <Shield className="w-4 h-4" />
+                        </div>
+                        <p className="font-bold text-xs">100% Seguro</p>
+                        <p className="text-[11px] text-muted-foreground">Autorização via OAuth oficial sem expor senhas.</p>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <p className="text-xs text-muted-foreground">
+                        Você será redirecionado para a página oficial do Mercado Pago para autorizar a conexão.
+                      </p>
+                      <Button
+                        className="btn-premium h-12 px-8 w-full sm:w-auto font-bold shrink-0"
+                        onClick={handleConnectMercadoPago}
+                        disabled={isConnectingPayment || !store?.id}
+                        id="connect-mercadopago-btn"
+                      >
+                        {isConnectingPayment ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            Iniciando Conexão...
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            Conectar Mercado Pago
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </motion.div>
+          )}
+
+          {activeTab !== "overview" && activeTab !== "appearance" && activeTab !== "theme" && activeTab !== "settings" && activeTab !== "orders" && activeTab !== "categories" && activeTab !== "coupons" && activeTab !== "plans" && activeTab !== "payments" && (
             <div className="h-64 flex flex-col items-center justify-center text-muted-foreground glass rounded-3xl">
               <p className="text-lg">Esta funcionalidade ({activeTab}) está em desenvolvimento.</p>
             </div>

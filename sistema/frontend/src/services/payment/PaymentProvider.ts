@@ -75,25 +75,51 @@ export class MercadoPagoRealPaymentService implements IPaymentService {
   }
 
   async getStoreConnectionStatus(storeId: string): Promise<StorePaymentConnectionStatus> {
-    const { data, error } = await supabase.functions.invoke("mercadopago-connection-status", {
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke(`mercadopago-connection-status?store_id=${encodeURIComponent(storeId)}`, {
+        headers: { "Content-Type": "application/json" },
+      });
 
-    if (error || !data) {
-      return {
-        connected: false,
-        provider: "mercadopago",
-        status: "inactive",
-      };
+      if (!error && data) {
+        return {
+          connected: data.connected ?? false,
+          provider: data.provider || "mercadopago",
+          status: data.status || "inactive",
+          providerUserId: data.provider_user_id,
+          publicKey: data.public_key,
+          updatedAt: data.updated_at,
+        };
+      }
+    } catch {
+      // Fallback abaixo
+    }
+
+    // Fallback seguro via RLS no banco de dados (leitura não-sensível da conexão)
+    try {
+      const { data: conn } = await supabase
+        .from("store_payment_connections")
+        .select("provider, status, provider_user_id, public_key, updated_at")
+        .eq("store_id", storeId)
+        .maybeSingle();
+
+      if (conn && conn.status === "active") {
+        return {
+          connected: true,
+          provider: conn.provider || "mercadopago",
+          status: conn.status as any,
+          providerUserId: conn.provider_user_id || undefined,
+          publicKey: conn.public_key || undefined,
+          updatedAt: conn.updated_at,
+        };
+      }
+    } catch {
+      // Fallback final
     }
 
     return {
-      connected: data.connected,
-      provider: data.provider,
-      status: data.status,
-      providerUserId: data.provider_user_id,
-      publicKey: data.public_key,
-      updatedAt: data.updated_at,
+      connected: false,
+      provider: "mercadopago",
+      status: "inactive",
     };
   }
 
