@@ -1282,3 +1282,18 @@ Resolução: Registrado como pendência de dados no ambiente remoto.
               vínculo de customers em create-order; seed de plans no banco remoto;
               deploy inicial no AWS Amplify Hosting.
 ```
+
+[2026-10-01] â€” MigraÃ§Ã£o CanÃ´nica para o Ecossistema e AdoÃ§Ã£o do Artefactho SDD Framework v1.0.0:
+              (1) InstalaÃ§Ã£o CanÃ´nica: O projeto foi integrado como repositÃ³rio Git autÃ´nomo e independente em
+              ARTEFACTHO â€” ECOSSISTEMA\13 â€” PROJETOS DE SOFTWARE\social_commerce_saas.
+              (2) SincronizaÃ§Ã£o GitHub: RepositÃ³rio remoto https://github.com/Artefactho/social_commerce_saas
+              100% sincronizado na branch main com commit de integraÃ§Ã£o da interface Mercado Pago.
+              (3) AdoÃ§Ã£o do Framework SDD: IncorporaÃ§Ã£o oficial do Artefactho SDD Framework v1.0.0 (Tag v1.0.0,
+              Commit 70caa06) com CONSTITUTION.md, regras de ambiguidade, gatilhos de pausa e skill adversarial.
+              (4) VerificaÃ§Ã£o de Build e Testes: 
+pm run build executado com sucesso e suÃ­te de testes Vitest
+              aprovada sem regressÃµes no novo ambiente.
+              (5) Estado do Projeto: Fases 0 a 4 concluÃ­das; Fase 5 (Checkout e Mercado Pago) em andamento aguardando
+              validaÃ§Ã£o em sandbox real de pagamento.
+              DecisÃµes tomadas: Manter o repositÃ³rio Git independente dentro de 13 â€” PROJETOS DE SOFTWARE.
+              PrÃ³ximo passo: Continuidade do desenvolvimento da Fase 5 (testes em sandbox do Mercado Pago).
